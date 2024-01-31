@@ -1,0 +1,114 @@
+# goalmaster.kv
+<StartupScreen>:
+    MDBoxLayout:
+    orientation: 'vertical'
+    padding: '12dp'
+    spacing: '12dp'
+
+    MDFlatButton:
+        text: 'START YOUR JOURNEY'
+        on_release: app.start_journey()
+
+<LoginScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Welcome to GoalMaster'
+            font_size: 24
+
+        TextInput:
+            id: username
+            hint_text: 'Username'
+            multiline: False
+
+        TextInput:
+            id: password
+            hint_text: 'Password'
+            password: True
+            multiline: False
+
+        Button:
+            text: 'Login'
+            on_press: root.login_user(username.text, password.text)
+
+<GoalScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Set Your Financial Goal'
+            font_size: 20
+
+        TextInput:
+            id: goal_name
+            hint_text: 'Goal Name'
+            multiline: False
+
+        TextInput:
+            id: target_amount
+            hint_text: 'Target Amount'
+            multiline: False
+
+        Button:
+            text: 'Save Goal'
+            on_press: root.save_goal(goal_name.text, target_amount.text)
+
+<TrackerScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Expense Tracker'
+            font_size: 20
+
+        TextInput:
+            id: expense_amount
+            hint_text: 'Expense Amount'
+            multiline: False
+
+        Button:
+            text: 'Add Expense'
+            on_press: root.add_expense(expense_amount.text)
+
+<PiggybagScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Savings Progress'
+            font_size: 20
+
+        ProgressBar:
+            id: savings_progress
+            max: 100
+            value: 40  # Example value, you will link this with actual data
+
+<HistoryScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Expense History'
+            font_size: 20
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+
+                # Populate this with dynamic widgets based on expense history

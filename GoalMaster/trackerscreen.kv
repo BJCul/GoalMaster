@@ -1,0 +1,99 @@
+TrackerScreen:
+
+    MDBoxLayout:
+        orientation: "vertical"
+        
+        MDTopAppBar:
+            title: "TRACKER"
+            elevation: 1
+            left_action_items: [['menu', lambda x: x]]
+            md_bg_color: "#0F1035"
+            pos_hint: {"center_x": .5, "center_y": .5}
+            #md_bg_color: "#B19470"
+        
+        MDFloatLayout:
+            pos_hint: {"center_x": 0.5, "center_y": 0.99}
+            #md_bg_color: "#B19470"
+            MDLabel:
+                text: "Daily Expenses"
+                theme_text_color: "Custom"
+                text_color: "#0F1035"
+                halign: "center"
+                pos_hint: {"center_x": 0.5, "center_y": 0.91}
+                font_style: "H5"
+                        
+        MDFloatLayout:  
+            #pos_hint: {"center_x": 0.5, "center_y": 1.5}      
+            #md_bg_color: "#B19470"                                   
+            MDCard:
+                id: list
+                radius: dp(10)
+                padding: dp(15)
+                size_hint: None, None
+                size: "300dp", "350dp"
+                md_bg_color: "#0F1035"
+                pos_hint: {"center_x": 0.5, "center_y": 1.2}
+                orientation: 'vertical'
+
+                
+                MDScrollView:
+                    do_scroll_y: True
+                    do_scroll_x: False
+                    height: 350
+                    size_hint_y: None
+                    pos_hint: {"center_x": 0.5, "center_y": .5}
+                    #md_bg_color: "#B19470"
+                    MDList: 
+                        id: list_items
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    #md_bg_color: "#B19470"
+                    height: dp(50)  # Adjust the height as needed
+                    #pos_hint: {"center_x": 0.5, "cente}
+
+                    MDIconButton:
+                        icon: "plus"
+                        style: "outlined"
+                        pos_hint: {"center_x": 0.5, "center_y": -1}
+                        #theme_bg_color: "Custom"
+                        #md_bg_color: "#0F1035"
+                        theme_icon_color: "Custom"
+                        icon_color: "white"
+                        font_size: "48sp"
+                        radius: [self.height / 2, ]
+                        size_hint: None, None
+                        on_press: root.add_item()
+
+            MDCard:
+                id: list2
+                radius: dp(10)
+                padding: dp(15)
+                size_hint: None, None
+                size: "300dp", "100dp"
+                md_bg_color: "#0F1035"
+                pos_hint: {"center_x": 0.5, "center_y": .3}
+                orientation: 'vertical'
+
+                MDLabel:
+                    halign: 'center'
+                    text: "Allowance/day: Php "
+                    theme_text_color: "Custom"
+                    text_color: "#FFFFFF"
+                
+                MDLabel:
+                    halign: 'center'
+                    text: "save: Php "
+                    theme_text_color: "Custom"
+                    text_color: "#FFFFFF"
+
+
+
+                    
+
+
+   
+
+
+
