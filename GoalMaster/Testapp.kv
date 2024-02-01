@@ -230,10 +230,13 @@ ScreenManager:
 
 <DashboardScreen>
     name: 'dashboard'
-    Screen:
-        MDLabel:
-            text: "Dashboard"
-            font_size: "30dp"
-            halign: "center"
-            pos_hint: {"center_x": 0.5, "center_y": 0.90}
-            color: "011F4B"
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar: 
+            title: 'My Account'
+            left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+            right_action_items: [['account', lambda x: app.navigation_draw()]]
+            elevation: 2
+
+        MDCard:
