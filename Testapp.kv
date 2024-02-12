@@ -1,0 +1,302 @@
+<StartupScreen>:
+    name: 'startup'
+    Image:
+        source: "images\GoalMaster_logo1.png"
+        pos_hint: {"center_x": 0.5, "center_y": 0.70}
+    MDLabel:
+        text: "Welcome!"
+        halign: "center"
+        pos_hint: {"center_x": 0.5, "center_y": 0.35}
+        text_color: "011F4B"
+        font_style: "Display"
+        role: "small"
+
+    MDLabel:
+        text: "PRESS HERE TO START YOUR JOURNEY"
+        halign: "center"
+        pos_hint: {"center_x": 0.5, "center_y": 0.30}
+        text_color: "011F4B"
+        font_style: "Body"
+        role: "medium"
+
+    MDButton:
+        style: "filled"
+        pos_hint: {'center_x':0.5,'center_y':0.20}
+        on_press: root.manager.current = 'startup1'
+        MDButtonText:
+            text: "START"
+            theme_text_color: "Custom"
+            text_color: "ffffff"
+
+<Startup1Screen>
+    name: 'startup1'
+    Screen:
+        MDLabel:
+            text: "Welcome to"
+
+            font_size: "20dp"
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.92}
+            text_color: "011F4B"
+
+        MDLabel:
+            text: "Goal Master"
+            font_size: "70dp"
+            halign: "center"
+            font_style: "Display"
+            role: 'small'
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            bold: True
+            text_color: "011F4B"
+            font_name: 'Roboto-Black.ttf'
+
+        Image:
+            source: "images\GoalMaster.png"
+            pos_hint: {"center_x": 0.5, "center_y": 0.65}
+            size_hint: .8, .8
+
+        MDLabel:
+            font_size: "14sp"
+            text: "Goal Master is a user-friendly financial management app that empowers individuals to set and achieve personalized savings goals with a comprehensive dashboard and easy tracking features."
+            pos_hint: {"center_x": 0.5, "center_y": 0.39}
+            -text_size: root.width - dp(100), None    
+            halign: 'center'
+            font_name: 'Roboto-Regular.ttf'
+
+        MDButton:
+            style: "tonal"
+            size_hint: .66, .065
+            pos_hint: {"center_x": 0.5, "center_y": 0.12}
+            halign: 'center'
+            on_press: root.manager.current = 'signup' #'startup2' 
+            MDButtonText:
+                text: "Next"
+                theme_text_color: "Custom"
+                text_color: "011F4B"
+        
+        MDButton:
+            style: "text"
+            text_color: '#808080'
+            line_color: 0, 0, 0, 0
+            pos_hint: {"center_x": 0.5,"center_y": 0.05}
+            on_press: root.manager.current = 'login'
+            MDButtonText:
+                text: "Skip"
+                theme_text_color: "Custom"
+                text_color: "011F4B"
+
+
+<Startup2Screen>
+    name: 'startup2'
+    Screen:
+        MDLabel:
+            text: "Create Goal:"
+            font_size: "20dp"
+            font_style: 'Display'
+            role: 'small'
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            text_color: "011F4B"
+        MDTextField:
+            id: goal
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .7}
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Name of your Goal"
+
+        MDTextField:
+            id: amout_save
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .59}
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Amount you want to save"
+
+        MDTextField:
+            id: duration
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .48}
+            hint_text: "Duration"
+            mode: 'outlined'        
+            MDTextFieldHintText:
+                text: "Duration"
+        MDButton:
+            style: "tonal"
+            size_hint: .66, .065
+            md_bg_color: 0.0039, 0.1216, 0.2941, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.13}
+            halign: 'center'
+            on_press: root.manager.current = 'dashboard' 
+            MDButtonText:
+                text: "Next"
+                theme_text_color: "Custom"
+                text_color: "011F4B"
+        MDButton:
+            style: "text"
+            text_color: '#808080'
+            line_color: 0, 0, 0, 0
+            pos_hint: {"center_x": 0.5,"center_y": 0.06}
+            on_press: root.manager.current = 'signup'
+            MDButtonText:
+                text: "Skip"
+                theme_text_color: "Custom"
+                text_color: "011F4B"
+
+<SignupScreen>
+    name: 'signup'
+    Screen:
+        MDIconButton:
+            icon: "arrow-left"
+            pos_hint: {"center_y": 0.95}
+            theme_text_color: "Custom"
+            on_press: root.manager.current = 'startup2'
+        MDLabel:
+            text: "Sign Up"
+            font_size: "20dp"
+            font_style: "Display"
+            role: "small"
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.80}
+            text_color: "011F4B"
+        MDTextField:
+            id: name
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .7}
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Name"
+
+        MDTextField:
+            id: password
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .59}
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Password"
+
+        MDTextField:
+            id: email
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .48} 
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Username"
+
+        MDButton:
+            style: "tonal"
+            text: "Sign up"
+            size_hint: .66, .065
+            md_bg_color: 0.0039, 0.1216, 0.2941, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.12}
+            halign: 'center'
+            on_press: root.manager.current = 'startup2' 
+            MDButtonText:
+                text: "Sign Up"
+                theme_text_color: "Custom"
+                text_color: "011F4B"
+        
+        MDButton:
+            style: "tonal"
+            text: "Log In"
+            line_color: 0, 0, 0, 0
+            pos_hint: {"center_x": 0.5,"center_y": 0.05}
+            on_press: root.manager.current = 'login'
+            MDButtonText:
+                text: "Login"
+                theme_text_color: "Custom"
+                text_color: "005B96"
+
+<LoginScreen>
+    name: 'login'
+    Screen:
+        MDIconButton:
+            icon: "arrow-left"
+            pos_hint: {"center_y": 0.95}
+            #theme_text_color: "Custom"
+            on_press: root.manager.current = 'signup'
+        MDLabel:
+            text: "Login"
+            font_style: "Display"
+            role: "small"
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            text_color: "011F4B" 
+            theme_text_color: 'Primary'           
+        MDTextField:
+            id: name
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .7} 
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Username"
+            MDTextFieldTrailingIcon:
+                icon: "account"
+
+
+        MDTextField:
+            id: password
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .59}
+            password: True
+            mode: 'outlined'
+            MDTextFieldHintText:
+                text: "Password"
+            MDTextFieldTrailingIcon: #not pindutable, but should be
+                icon: "eye-off"
+
+
+
+        MDButton:
+            style: "tonal"
+            size_hint: .66, .065
+            md_bg_color: 0.0039, 0.1216, 0.2941, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.42}
+            halign: 'center'
+            on_press: root.manager.current = 'dashboard'     
+            MDButtonText:
+                text: "Login"
+                theme_text_color: "Custom"
+                text_color: "005B96"   
+        MDButton:
+            style: "text"
+            size_hint: .60, .055
+            line_color: 0, 0, 0, 0
+            pos_hint: {"center_x": 0.5,"center_y": 0.30}
+            on_press: root.manager.current = 'dashboard'
+            MDButtonText:
+                text: "Forgot Password"
+                theme_text_color: "Custom"
+                text_color: "005B96"
+
+<DashboardScreen>
+    name: 'dashboard'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar: 
+            type: 'small'
+
+            MDTopAppBarLeadingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "menu"
+                    md_icon_color: "005B96"
+            
+            MDTopAppBarTitle:
+                text: "My Account"
+                theme_text_color: "Custom"
+                text_color: "005B96"
+                pos_hint: {"center_x": .5}
+
+            MDTopAppBarTrailingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "account"
+
+            #title: 'My Account'
+            #text: "hehehe"
+            #left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+            #right_action_items: [['account', lambda x: app.navigation_draw()]]
+            #elevation: 2
+            #theme_text_color: "Custom"
+            #text_color: "011F4B"
