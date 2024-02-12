@@ -127,7 +127,9 @@
             md_bg_color: 0.0039, 0.1216, 0.2941, 1
             pos_hint: {"center_x": 0.5, "center_y": 0.13}
             halign: 'center'
-            on_press: root.manager.current = 'dashboard' 
+            on_press: 
+                root.add_goal()
+                root.manager.current = 'dashboard' 
             MDButtonText:
                 text: "Next"
                 theme_text_color: "Custom"
@@ -164,14 +166,23 @@
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .7}
             mode: 'outlined'
+            icon_right: "account"
+            write_tab: False
+            helper_text_mode: "on_error"
+            helper_text: "This field is required"
             MDTextFieldHintText:
                 text: "Name"
+            
 
         MDTextField:
             id: password
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .59}
             mode: 'outlined'
+            icon_right: "account"
+            write_tab: False
+            helper_text_mode: "on_error"
+            helper_text: "This field is required"
             MDTextFieldHintText:
                 text: "Password"
 
@@ -180,8 +191,12 @@
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .48} 
             mode: 'outlined'
+            icon_right: "account"
+            write_tab: False
+            helper_text_mode: "on_error"
+            helper_text: "This field is required"
             MDTextFieldHintText:
-                text: "Username"
+                text: "Email"
 
         MDButton:
             style: "tonal"
@@ -191,6 +206,8 @@
             pos_hint: {"center_x": 0.5, "center_y": 0.12}
             halign: 'center'
             on_press: root.manager.current = 'startup2' 
+            on_press: 
+                root.register_btn_click()
             MDButtonText:
                 text: "Sign Up"
                 theme_text_color: "Custom"
@@ -224,18 +241,18 @@
             text_color: "011F4B" 
             theme_text_color: 'Primary'           
         MDTextField:
-            id: name
+            id: login_email
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .7} 
             mode: 'outlined'
             MDTextFieldHintText:
-                text: "Username"
+                text: "Email"
             MDTextFieldTrailingIcon:
                 icon: "account"
 
 
         MDTextField:
-            id: password
+            id: login_password
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .59}
             password: True
@@ -253,7 +270,10 @@
             md_bg_color: 0.0039, 0.1216, 0.2941, 1
             pos_hint: {"center_x": 0.5, "center_y": 0.42}
             halign: 'center'
-            on_press: root.manager.current = 'dashboard'     
+            on_press: 
+                root.user_login()
+                root.manager.current = 'dashboard' if root.successful_login else 'login' 
+
             MDButtonText:
                 text: "Login"
                 theme_text_color: "Custom"
