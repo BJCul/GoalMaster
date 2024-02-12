@@ -11,7 +11,9 @@ class MySQLdb:
             )
         self.cursor = self.db.cursor()
         self.create_user_table()
+        self.create_expenses()
         self.show_table()
+        self.create_goal_table()
 
     def show_db(self):
         """show database"""
@@ -102,7 +104,57 @@ class MySQLdb:
         """Triggered when the user logsout"""
         self.cursor.execute("UPDATE users SET loggedin = 0, keeploggedin = 0 WHERE loggedin = 1")
         self.db.commit()
+
+    #####################################FOR GOAL#####################################
+    def create_goal_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS goals
+                    (ID     INT     PRIMARY KEY AUTO_INCREMENT,
+                    goal_name    TEXT                NOT NULL,
+                    goal_amount   INT                 NOT NULL,
+                    goal_duration  date                )""")
     
+    def create_goals(self,goal_name, goal_amount, duration):
+        sql = "INSERT INTO expenses VALUES (%s, %s, %s, %s)"
+        values = (goal_name, goal_amount, duration)
+        self.cursor.execute (sql, values)
+        self.db.commit()
+
+    #####################################FOR EXPENSESS################################
+
+    def create_expenses(self):  
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS expenses
+                    (ID     INT     PRIMARY KEY NOT NULL,
+                    name    TEXT                NOT NULL,
+                    price   INT                 NOT NULL)""")
+    
+    def insert_expenses(self, item_id, item_name, item_price):
+        sql = "INSERT INTO expenses VALUES (%s, %s, %s)"
+        values = (item_id, item_name, item_price)
+        self.cursor.execute (sql, values)
+        self.db.commit()
+
+    def delete_expenses(self, item_id):
+        sql = "DELETE FROM expenses WHERE id=%s"
+        value = (item_id)
+        self.cursor.execute (sql, value)
+        self.db.commit()
+
+    def get_expenses(self):
+        self.cursor.execute("SELECT * FROM expenses")
+        expenses = self.cursor.fetchall()
+        if expenses:
+            return expenses[0][0]
+        else:
+            return None
+
+    
+    def total_spending(self):
+        self.cursor.execute("SELECT SUM(price) FROM expenses;")
+        sum = self.cursor.fetchone()
+        return sum
+
+
+
     def close_db_connection(self):
         self.cursor.close()
     
