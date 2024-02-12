@@ -207,7 +207,7 @@
             halign: 'center'
             on_press: root.manager.current = 'startup2' 
             on_press: 
-                root.register_btn_click()
+                root.create_user()
             MDButtonText:
                 text: "Sign Up"
                 theme_text_color: "Custom"
@@ -232,6 +232,7 @@
             pos_hint: {"center_y": 0.95}
             #theme_text_color: "Custom"
             on_press: root.manager.current = 'signup'
+
         MDLabel:
             text: "Login"
             font_style: "Display"
@@ -239,12 +240,14 @@
             halign: "center"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             text_color: "011F4B" 
-            theme_text_color: 'Primary'           
+            theme_text_color: 'Primary'       
+
         MDTextField:
             id: login_email
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .7} 
             mode: 'outlined'
+            write_tab: False
             MDTextFieldHintText:
                 text: "Email"
             MDTextFieldTrailingIcon:
@@ -257,12 +260,22 @@
             pos_hint: {"center_x": .5, "top": .59}
             password: True
             mode: 'outlined'
+            write_tab: False
             MDTextFieldHintText:
                 text: "Password"
             MDTextFieldTrailingIcon: #not pindutable, but should be
                 icon: "eye-off"
+        
+        MDBoxLayout:
+            size_hint: .5, None
+            pos_hint: {"center_x": .5, "top": .45}
 
-
+            MDCheckbox:
+                id: keepmeloggedin
+            
+            MDLabel:
+                text: "Keep me logged in"
+            
 
         MDButton:
             style: "tonal"
@@ -283,7 +296,7 @@
             size_hint: .60, .055
             line_color: 0, 0, 0, 0
             pos_hint: {"center_x": 0.5,"center_y": 0.30}
-            on_press: root.manager.current = 'dashboard'
+            on_press: root.manager.current = 'login'
             MDButtonText:
                 text: "Forgot Password"
                 theme_text_color: "Custom"

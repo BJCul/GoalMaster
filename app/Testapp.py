@@ -2,37 +2,33 @@ from kivy.lang import Builder
 # from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
-from kivymd.uix.dialog import MDDialog
+from kivymd.uix.dialog import MDDialog, MDDialogHeadlineText, MDDialogButtonContainer, MDDialogSupportingText
 from kivymd.app import MDApp
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivy.uix.widget import Widget
+from kivymd.app import MDApp
+from kivy.properties import StringProperty
+from kivymd.uix.button import MDButton, MDButtonText
 import os
 from database import MySQLdb
-
-
-
+from kivymd.uix.navigationdrawer import (
+    MDNavigationDrawerItem, MDNavigationDrawerItemTrailingText
+)
+from kivy.uix.screenmanager import SlideTransition
 
 Window.size = (360, 640)
-
-# class BaseScreen(MDScreen):
-#     def __init__(self, *args, **kwargs):
-#         # print(MDApp.get_running_app())
-#         super().__init__(*args, **kwargs)
     
-class ContentNavigationDrawer(BoxLayout):
-        pass
+class InvalidLoginPopup(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
+class EmailAlreadyExists(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-# screen_manager = MDScreenManager()
-# Adding screens to the screen manager
-# screen_manager.add_widget(SampleScreen())
-# screen_manager.add_widget(StartupScreen(name='startup'))
-# screen_manager.add_widget(Startup1Screen(name='startup1'))
-# screen_manager.add_widget(Startup2Screen(name='startup2'))
-# screen_manager.add_widget(LoginScreen(name='login'))
-# screen_manager.add_widget(LoginScreen(name='signup'))
-# screen_manager.add_widget(DashboardScreen(name='dashboard'))
 
 
 class MyApp(MDApp):
@@ -45,20 +41,53 @@ class MyApp(MDApp):
         self.theme_cls.primary_palette = "Steelblue"
         self.db  = MySQLdb()
 
+        self.screen_manager = MDScreenManager()
+        self.screen_manager.add_widget(StartupScreen(name='startup'))
+        self.screen_manager.add_widget(Startup1Screen(name='startup1'))
+        self.screen_manager.add_widget(CreateGoal(name='creategoal'))
+        self.screen_manager.add_widget(LoginScreen(name='login'))
+        self.screen_manager.add_widget(SignupScreen(name='signup'))
+        self.screen_manager.add_widget(DashboardScreen(name='dashboard'))
+        self.screen_manager.add_widget(TrackerScreen(name='tracker'))
+        self.screen_manager.add_widget(PiggyScreen(name='piggy'))
+        self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
+        self.screen_manager.current = "startup"
 
+        return self.screen_manager
+    
+    def switch_to_screen(self, screen_name):
+        current_screen_name = self.screen_manager.current
+        transition_direction = self.determine_transition_direction(current_screen_name, screen_name)
+        self.screen_manager.transition = SlideTransition(direction=transition_direction)
+        self.screen_manager.current = screen_name
 
-        screen_manager = MDScreenManager()
-        screen_manager.add_widget(StartupScreen(name='startup'))
-        screen_manager.add_widget(Startup1Screen(name='startup1'))
-        screen_manager.add_widget(Startup2Screen(name='startup2'))
-        screen_manager.add_widget(LoginScreen(name='login'))
-        screen_manager.add_widget(SignupScreen(name='signup'))
-        screen_manager.add_widget(DashboardScreen(name='dashboard'))
-        #screen_manager.add_widget(AnotherScreen(name='another_screen'))
-        screen_manager.current = "startup"
+    def determine_transition_direction(self, current_screen_name, target_screen_name):
+        # Determine the transition direction based on the current screen and target screen
+        if current_screen_name == 'login' and target_screen_name == 'dashboard':
+            return 'left'
+        elif current_screen_name == 'tracker' and target_screen_name == 'dashboard':
+            return 'right'
+        elif current_screen_name == 'piggy' and target_screen_name == 'dashboard':
+            return 'right'
+        elif current_screen_name == 'dashboard' and target_screen_name == 'tracker':
+            return 'left'
+        elif current_screen_name == 'dashboard' and target_screen_name == 'piggy':
+            return 'left'
+        # Add more conditions as needed for other screen transitions
+        else:
+            # Default transition direction
+            return 'left'  # Or any other default direction you prefer
 
+    def switch_window(self, window, boolean_val):
+        if boolean_val == True:
+            self.root.current = window
+            self.root.transition.direction = "right"
 
-        return screen_manager
+        else:
+            pass
+
+    def on_stop(self):
+        self.db.close_db_connection()
 
 class BaseScreen(MDScreen):
     def __init__(self, *args, **kwargs):
@@ -69,6 +98,10 @@ class BaseScreen(MDScreen):
 class StartupScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+    
+    def switch_to_dashboard(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('dashboard')
 
 class Startup1Screen(BaseScreen):
     def __init__(self, **kwags):
@@ -94,17 +127,53 @@ class SignupScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
         self.db  = MySQLdb()
-
-
-    def register_btn_click(self):
-        name = self.ids.name.text
+        
+    def create_user(self):
+        """creating a account"""
+        name = self.ids.name.text 
         email = self.ids.email.text
         password = self.ids.password.text
-        create_user = self.db.create_user(name, email, password)
-        if create_user:
-            print('user account created successfully')
-        if not create_user:
-            print('account not created')
+
+        # Check if user input have info
+        if email != '' and password != '':
+            if self.db.check_email(email) == False: # Check email in the db if exist, if not create user then return True
+                self.db.create_user(name,email,password)
+                self.ids.name.text=''
+                self.ids.email.text = ''
+                self.ids.password.text=''
+                return True, print("do not exist")
+            
+            elif self.db.check_email(email) == True: # Pop up the email exist then return false
+                self.email_exists_popup()
+                return False
+
+        else:
+            self.invalid_popup()
+
+    def invalid_popup(self):
+        '''Pop up for invalid entries'''
+        invalid_input = InvalidLoginPopup() 
+        MDDialog (
+                MDDialogHeadlineText(
+                text="Invalid Entries",
+                halign="left",
+                content_cls = invalid_input 
+            )
+        ).open()
+
+    def email_exists_popup(self):
+        '''Pop up when email entered already exists'''
+        self.email_dialog = MDDialog(
+                type="custom",
+                content_cls= EmailAlreadyExists(),
+                size_hint=(.4, .4),
+                auto_dismiss=True,
+            )
+        self.email_dialog.open()
+
+    def enable_signup_btn(self):
+        self.ids.signupbtn.disabled = False
+
     
 class LoginScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -115,14 +184,55 @@ class LoginScreen(BaseScreen):
     def user_login(self):
         email = self.ids.login_email.text
         password = self.ids.login_password.text
-        login = self.db.login(email, password)
-        if login:
-            self.successful_login = True
-            print('User has login successfully')
-        if not login:
-            self.successful_login = False
-            print('You have entered wrong user credentials')
+        if self.ids.keepmeloggedin.active == True:
+            keep_me_logged = True
 
+            if email != '' and password != '':
+                userid = self.db.get_user(email, password, keep_me_logged)
+        
+                # validate the user
+                if userid == True:
+                    self.successful_login = True
+                    self.ids.login_email.text = ''
+                    self.ids.login_password.text=''
+                    return True, print("login success")
+                
+                elif userid == False:
+                    self.invalid_popup()
+        
+                else:
+                    self.invalid_popup()
+
+        else: 
+            keep_me_logged = False, print("Login unsuccessful")  
+        
+        
+
+    def invalid_popup(self):
+        '''Pop up for invalid entries'''
+        MDDialog (
+            MDDialogHeadlineText(
+                text="Incorrect Username or Password",
+                halign="left"
+            ),
+            MDDialogSupportingText(
+                text="You have entered invalid details. Please try again.",
+                halign="left",
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Try Again"),
+                    style="text",
+                    
+                ),
+                MDButton(
+                    MDButtonText(text="Sign Up"),
+                    style="text",
+                ),
+                spacing="8dp",
+            ),
+        ).open()
 
 class DashboardScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -133,6 +243,63 @@ class DashboardScreen(BaseScreen):
 
     def item_selected(self, text):
         print(f'Item selected: {text}')
+    
+    def switch_to_tracker(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('tracker')
+
+class CreateGoal(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags)
+
+
+class DrawerLabel(MDBoxLayout):
+    icon = StringProperty()
+    text = StringProperty()
+ 
+
+class DrawerItem(MDNavigationDrawerItem):
+    icon = StringProperty()
+    text = StringProperty()
+
+    _trailing_text_obj = None
+
+    def on_trailing_text(self, instance, value):
+        self._trailing_text_obj = MDNavigationDrawerItemTrailingText(
+            text=value,
+            theme_text_color="Custom",
+            text_color=self.trailing_text_color,
+        )
+        self.add_widget(self._trailing_text_obj)
+
+    def on_trailing_text_color(self, instance, value):
+        self._trailing_text_obj.text_color = value
+
+class TrackerScreen(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags)
+    
+    def switch_to_dashboard(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('dashboard')
+
+class PiggyScreen(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags)
+    
+    def switch_to_dashboard(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('dashboard')
+    
+    def switch_to_history_piggy(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('history_piggy')
+
+class HistoryScreen_Piggy(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags)
 
 if __name__ == "__main__":
     MyApp().run()
+
+
