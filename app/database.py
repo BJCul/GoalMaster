@@ -113,11 +113,15 @@ class MySQLdb:
                     goal_amount   INT                 NOT NULL,
                     goal_duration  date                )""")
     
-    def create_goals(self,goal_name, goal_amount, duration):
-        sql = "INSERT INTO expenses VALUES (%s, %s, %s, %s)"
-        values = (goal_name, goal_amount, duration)
-        self.cursor.execute (sql, values)
-        self.db.commit()
+    def create_goals(self,user_id,goal_name, goal_amount, duration):
+        sql = "INSERT INTO goals VALUES (%s,%s, %s, %s)"
+        values = (user_id,goal_name, goal_amount, duration)
+        try:
+            self.cursor.execute (sql, values)
+            self.db.commit()
+        except Exception as e:
+            print("Error creating goal:", e)
+            return False 
 
     #####################################FOR EXPENSESS################################
 

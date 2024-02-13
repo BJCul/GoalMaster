@@ -19,17 +19,6 @@ from kivymd.uix.navigationdrawer import (
 from kivy.uix.screenmanager import SlideTransition
 
 Window.size = (360, 640)
-    
-class InvalidLoginPopup(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-class EmailAlreadyExists(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
 
 class MyApp(MDApp):
     def __init__(self, **kwargs):
@@ -44,7 +33,7 @@ class MyApp(MDApp):
         self.screen_manager = MDScreenManager()
         self.screen_manager.add_widget(StartupScreen(name='startup'))
         self.screen_manager.add_widget(Startup1Screen(name='startup1'))
-        self.screen_manager.add_widget(CreateGoal(name='creategoal'))
+        self.screen_manager.add_widget(CreateGoalScreen(name='creategoal'))
         self.screen_manager.add_widget(LoginScreen(name='login'))
         self.screen_manager.add_widget(SignupScreen(name='signup'))
         self.screen_manager.add_widget(DashboardScreen(name='dashboard'))
@@ -89,6 +78,12 @@ class MyApp(MDApp):
     def on_stop(self):
         self.db.close_db_connection()
 
+
+
+
+
+
+
 class BaseScreen(MDScreen):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -106,22 +101,6 @@ class StartupScreen(BaseScreen):
 class Startup1Screen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
-
-class Startup2Screen(BaseScreen):
-    def __init__(self, **kwags):
-        super().__init__(**kwags)
-        self.db  = MySQLdb()
-    
-    def add_goal(self):
-        goal_name = self.ids.goal_name.text
-        goal_amount = self.ids.goal_amount.text
-        goal_duration = self.ids.goal_duration.text
-        create_goal = self.db.create_goal(goal_name, goal_duration, goal_amount)
-        if create_goal:
-            print('goal created successfully')
-        if not create_goal:
-            print('goal not created')
-
 
 class SignupScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -141,7 +120,7 @@ class SignupScreen(BaseScreen):
                 self.ids.name.text=''
                 self.ids.email.text = ''
                 self.ids.password.text=''
-                return True, print("do not exist")
+                return True, self.successful_signup_popup(), print("do not exist")
             
             elif self.db.check_email(email) == True: # Pop up the email exist then return false
                 self.email_exists_popup()
@@ -152,24 +131,89 @@ class SignupScreen(BaseScreen):
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
-        invalid_input = InvalidLoginPopup() 
-        MDDialog (
-                MDDialogHeadlineText(
+        dialog = MDDialog(
+            MDDialogHeadlineText(
                 text="Invalid Entries",
                 halign="left",
-                content_cls = invalid_input 
-            )
-        ).open()
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Log in"),
+                    style="text",
+                    on_press=lambda *args: self.root.current(dialog)
+
+                ),
+                spacing="8dp",
+                
+            ),
+        )
+        dialog.open()
+    
+    
+
+    def successful_signup_popup(self):
+        '''Pop up for invalid entries'''
+        dialog = MDDialog(
+            MDDialogSupportingText(
+                text="You have successfully created an account. Want to Log in?",
+                halign="left",
+            ), 
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Create account again"),
+                    style="text",
+                    on_press=lambda *args: self.dismiss_dialog(dialog)
+
+                ),
+                MDButton(
+                    MDButtonText(text="Log In"),
+                    style="text",
+                    on_press=lambda *args: self.goto_login(dialog)
+
+                ),
+                spacing="8dp",
+                
+            ),
+            size_hint = (.9, None)
+        )
+        dialog.open()
 
     def email_exists_popup(self):
         '''Pop up when email entered already exists'''
-        self.email_dialog = MDDialog(
-                type="custom",
-                content_cls= EmailAlreadyExists(),
-                size_hint=(.4, .4),
-                auto_dismiss=True,
-            )
-        self.email_dialog.open()
+        dialog = MDDialog (            
+            MDDialogSupportingText(
+                text="You have already have an account",
+                halign="left",
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Try Again"),
+                    style="text",
+                    on_press=lambda *args: self.dismiss_dialog(dialog)
+
+                ),
+                MDButton(
+                    MDButtonText(text="Log In"),
+                    style="text",
+                    on_press=lambda *args: self.goto_login(dialog)
+
+                ),
+                spacing="8dp",
+                
+            ),
+            size_hint = (.9, None)
+        )
+        dialog.open()
+
+    def dismiss_dialog(self, dialog):
+        dialog.dismiss()
+    
+    def goto_login(self, dialog):
+        self.manager.current = 'login'
+        dialog.dismiss()
 
     def enable_signup_btn(self):
         self.ids.signupbtn.disabled = False
@@ -180,37 +224,36 @@ class LoginScreen(BaseScreen):
         super().__init__(**kwags) 
         self.db  = MySQLdb()
         self.successful_login = False
+        self.user_id = None
     
     def user_login(self):
         email = self.ids.login_email.text
         password = self.ids.login_password.text
-        if self.ids.keepmeloggedin.active == True:
+        # check if user has press the keep me logged in check box
+        if self.ids.keepmeloggedin.active == True:    
             keep_me_logged = True
-
-            if email != '' and password != '':
-                userid = self.db.get_user(email, password, keep_me_logged)
-        
-                # validate the user
-                if userid == True:
-                    self.successful_login = True
-                    self.ids.login_email.text = ''
-                    self.ids.login_password.text=''
-                    return True, print("login success")
-                
-                elif userid == False:
-                    self.invalid_popup()
-        
-                else:
-                    self.invalid_popup()
-
         else: 
-            keep_me_logged = False, print("Login unsuccessful")  
-        
-        
+            keep_me_logged = False
+        # check if users has an account 
+        if email != '' and password != '':            
+            userid = self.db.get_user(email, password, keep_me_logged)
+    
+            # validate the user
+            if userid == True:
+                self.successful_login = True
+                self.ids.login_email.text = ''
+                self.ids.login_password.text=''
+                return True, print("login success")
+            
+            elif userid == False:
+                self.invalid_popup()
+    
+            else:
+                self.invalid_popup()
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
-        MDDialog (
+        dialog = MDDialog (
             MDDialogHeadlineText(
                 text="Incorrect Username or Password",
                 halign="left"
@@ -224,15 +267,28 @@ class LoginScreen(BaseScreen):
                 MDButton(
                     MDButtonText(text="Try Again"),
                     style="text",
-                    
+                    on_press=lambda *args: self.dismiss_dialog(dialog)
+
                 ),
                 MDButton(
                     MDButtonText(text="Sign Up"),
-                    style="text",
-                ),
+                    style="text", 
+                    on_press = lambda *args: self.goto_signup(dialog)
+                    
+                ), 
                 spacing="8dp",
             ),
-        ).open()
+            size_hint=(.95, .5)
+        )
+        dialog.open()
+
+        
+    def dismiss_dialog(self, dialog):
+        dialog.dismiss()
+
+    def goto_signup(self, dialog):
+        self.manager.current = 'signup'
+        dialog.dismiss()
 
 class DashboardScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -248,9 +304,21 @@ class DashboardScreen(BaseScreen):
         app = MDApp.get_running_app()
         app.switch_to_screen('tracker')
 
-class CreateGoal(BaseScreen):
+class CreateGoalScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+        self.db  = MySQLdb()
+    
+    def add_goal(self):
+        user_id = self.get_logged_in_userid()  
+        goal_name = self.ids.goal_name.text
+        goal_amount = self.ids.goal_amount.text
+        goal_duration = self.ids.goal_duration.text
+        create_goal = self.db.create_goals(user_id, goal_name, goal_amount, goal_duration)
+        if create_goal:
+            print('goal created successfully')
+        if not create_goal:
+            print('goal not created')
 
 
 class DrawerLabel(MDBoxLayout):
