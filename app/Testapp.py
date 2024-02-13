@@ -310,7 +310,7 @@ class CreateGoalScreen(BaseScreen):
         self.db  = MySQLdb()
     
     def add_goal(self):
-        user_id = self.get_logged_in_userid()  
+        user_id = self.db.get_logged_in_userid()  
         goal_name = self.ids.goal_name.text
         goal_amount = self.ids.goal_amount.text
         goal_duration = self.ids.goal_duration.text
@@ -319,6 +319,8 @@ class CreateGoalScreen(BaseScreen):
             print('goal created successfully')
         if not create_goal:
             print('goal not created')
+
+
 
 
 class DrawerLabel(MDBoxLayout):

@@ -98,7 +98,7 @@
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             text_color: "011F4B"
         MDTextField:
-            id: goal
+            id: goal_name
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .7}
             mode: 'outlined'
@@ -106,7 +106,7 @@
                 text: "Name of your Goal"
 
         MDTextField:
-            id: amout_save
+            id: goal_amount
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .59}
             mode: 'outlined'
@@ -114,7 +114,7 @@
                 text: "Amount you want to save"
 
         MDTextField:
-            id: duration
+            id: goal_duration
             size_hint_x: .7
             pos_hint: {"center_x": .5, "top": .48}           
             text: "2025-12-31"
@@ -132,7 +132,7 @@
                 root.add_goal()
                 root.manager.current = 'dashboard' 
             MDButtonText:
-                text: "Next"
+                text: "Start Journey"
                 theme_text_color: "Custom"
                 text_color: "011F4B"
         MDButton:
@@ -140,7 +140,7 @@
             text_color: '#808080'
             line_color: 0, 0, 0, 0
             pos_hint: {"center_x": 0.5,"center_y": 0.06}
-            on_press: root.manager.current = 'signup'
+            on_press: root.manager.current = 'dashboard'
             MDButtonText:
                 text: "Skip"
                 theme_text_color: "Custom"
@@ -305,6 +305,12 @@
 
 <DashboardScreen>
     name: 'dashboard'
+
+    MDIconButton:
+        icon: "arrow-left"
+        pos_hint: {"center_y": 0.95}
+        theme_text_color: "Custom"
+        on_press: root.manager.current = 'login'
 
     BoxLayout:
         orientation: 'vertical'
