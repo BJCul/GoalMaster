@@ -321,8 +321,6 @@ class CreateGoalScreen(BaseScreen):
             print('goal not created')
 
 
-
-
 class DrawerLabel(MDBoxLayout):
     icon = StringProperty()
     text = StringProperty()
@@ -348,7 +346,11 @@ class DrawerItem(MDNavigationDrawerItem):
 class TrackerScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
-    
+
+
+
+
+
     def switch_to_dashboard(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('dashboard')
@@ -368,6 +370,8 @@ class PiggyScreen(BaseScreen):
 class HistoryScreen_Piggy(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+
+    
 
 if __name__ == "__main__":
     MyApp().run()

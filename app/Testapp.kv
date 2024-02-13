@@ -1,5 +1,10 @@
 <StartupScreen>:
     name: 'startup'
+    MDIconButton:
+        icon: "arrow-left"
+        pos_hint: {"center_y": 0.95}
+        theme_text_color: "Custom"
+        on_press: root.manager.current = 'tracker'   
     Image:
         source: "images\GoalMaster_logo1.png"
         pos_hint: {"center_x": 0.5, "center_y": 0.70}
@@ -340,3 +345,89 @@
             #elevation: 2
             #theme_text_color: "Custom"
             #text_color: "011F4B"
+
+
+
+<TrackerScreen>
+    name: 'tracker'
+
+    BoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar: 
+            type: 'small'
+
+            MDTopAppBarLeadingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    on_press: root.manager.current = 'dashboard'
+            
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDLabel: 
+                padding: 2   
+                size_hint: (1, None)
+                valign: "top"
+                halign: "center"
+                font_style: "Headline"
+                text: "EXPENSES"
+                type: 'large'
+
+            MDLabel: 
+                id: total_expenses
+                padding: 2     
+                size_hint: (1, None)
+                valign: "top"
+                halign: "center"
+                font_style: "Body"
+                text: "Total Expenses: Php 500"
+
+            ScrollView:
+                id: item_table
+            
+            MDBoxLayout:
+                spacing: 20
+                #size_hint: (1, None)
+            
+                #MDTextField:
+                    #id: item_name
+                    #hint_text: "Name"
+                
+                #MDTextField:
+                    #id: item_price
+                    #helper_text: "Enter the amount"
+                    #helper_text_mode: "on_error"
+                    #size_hint: (0.3, None)
+                    #hint_text: "Price"
+
+                MDIconButton: 
+                    icon: "plus"
+                    style: "filled"
+
+                #MDTextField:
+                    #id: item_id
+                    #helper_text: "Please enter a number"
+                    #helper_text_mode: "on_error"
+                    #size_hint: (0.15, None)
+                    #hint_text: "ID"
+
+                #MDButton:
+                    #style: "elevated"
+                    #id: delete_expenses_button
+                    #text: "Delete"
+   
+            
+
+
+
+
+        
+            
+
+
+            
+
+
+    
+
