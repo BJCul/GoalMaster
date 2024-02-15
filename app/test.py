@@ -2,24 +2,34 @@ from kivy.lang import Builder
 
 from kivymd.font_definitions import theme_font_styles
 from kivymd.app import MDApp
+from kivy.core.window import Window
+
+Window.size = (360, 640)
 
 KV = '''
 MDScreen:
     md_bg_color: self.theme_cls.backgroundColor
+    
+    MDFloatLayout:
+        
+        MDCard:
+            size_hint: None, None
+            size: "340dp", "300dp"  
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-    MDRecycleView:
-        id: rv
-        key_viewclass: 'viewclass'
-        key_size: 'height'
+            MDRecycleView:
+                id: rv
+                key_viewclass: 'viewclass'
+                key_size: 'height'
 
-        RecycleBoxLayout:
-            padding: dp(10)
-            spacing: dp(10)
-            default_size: None, dp(48)
-            default_size_hint: 1, None
-            size_hint_y: None
-            height: self.minimum_height
-            orientation: "vertical"
+                RecycleBoxLayout:
+                    padding: dp(10)
+                    spacing: dp(10)
+                    default_size: None, dp(48)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: "vertical"
 '''
 
 

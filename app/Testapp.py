@@ -17,6 +17,9 @@ from kivymd.uix.navigationdrawer import (
     MDNavigationDrawerItem, MDNavigationDrawerItemTrailingText
 )
 from kivy.uix.screenmanager import SlideTransition
+from kivy.uix.scrollview import ScrollView
+from kivymd.uix.label import MDLabel
+
 
 Window.size = (360, 640)
 
@@ -36,7 +39,9 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(CreateGoalScreen(name='creategoal'))
         self.screen_manager.add_widget(LoginScreen(name='login'))
         self.screen_manager.add_widget(SignupScreen(name='signup'))
+        self.screen_manager.add_widget(SignupScreen1(name='signup1'))
         self.screen_manager.add_widget(DashboardScreen(name='dashboard'))
+        self.screen_manager.add_widget(CreateexpensesScreen(name='createexpenses'))
         self.screen_manager.add_widget(TrackerScreen(name='tracker'))
         self.screen_manager.add_widget(PiggyScreen(name='piggy'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
@@ -62,26 +67,17 @@ class MyApp(MDApp):
             return 'left'
         elif current_screen_name == 'dashboard' and target_screen_name == 'piggy':
             return 'left'
+        elif current_screen_name == 'history_piggy' and target_screen_name == 'piggy':
+            return 'down'
+        elif current_screen_name == 'piggy' and target_screen_name == 'history_piggy':
+            return 'up'
         # Add more conditions as needed for other screen transitions
         else:
             # Default transition direction
             return 'left'  # Or any other default direction you prefer
 
-    def switch_window(self, window, boolean_val):
-        if boolean_val == True:
-            self.root.current = window
-            self.root.transition.direction = "right"
-
-        else:
-            pass
-
     def on_stop(self):
         self.db.close_db_connection()
-
-
-
-
-
 
 
 class BaseScreen(MDScreen):
@@ -114,7 +110,7 @@ class SignupScreen(BaseScreen):
         password = self.ids.password.text
 
         # Check if user input have info
-        if email != '' and password != '':
+        if email != '' and password != '' and name != '':
             if self.db.check_email(email) == False: # Check email in the db if exist, if not create user then return True
                 self.db.create_user(name,email,password)
                 self.ids.name.text=''
@@ -132,21 +128,10 @@ class SignupScreen(BaseScreen):
     def invalid_popup(self):
         '''Pop up for invalid entries'''
         dialog = MDDialog(
-            MDDialogHeadlineText(
+            MDDialogSupportingText(
                 text="Invalid Entries",
                 halign="left",
-            ),
-            MDDialogButtonContainer(
-                Widget(),
-                MDButton(
-                    MDButtonText(text="Log in"),
-                    style="text",
-                    on_press=lambda *args: self.root.current(dialog)
-
-                ),
-                spacing="8dp",
-                
-            ),
+            ),           
         )
         dialog.open()
     
@@ -218,6 +203,93 @@ class SignupScreen(BaseScreen):
     def enable_signup_btn(self):
         self.ids.signupbtn.disabled = False
 
+class SignupScreen1(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags)
+        self.db  = MySQLdb()
+        
+    def create_user(self):
+        """creating a account"""
+        name = self.ids.name.text 
+        email = self.ids.email.text
+        password = self.ids.password.text
+
+        # Check if user input have info
+        if email != '' and password != '' and name != '':
+            if self.db.check_email(email) == False: # Check email in the db if exist, if not create user then return True
+                self.db.create_user(name,email,password)
+                self.ids.name.text=''
+                self.ids.email.text = ''
+                self.ids.password.text=''
+                return True, self.successful_signup_popup(), print("do not exist")
+            
+            elif self.db.check_email(email) == True: # Pop up the email exist then return false
+                self.email_exists_popup()
+                return False
+
+        else:
+            self.invalid_popup()
+
+    def invalid_popup(self):
+        '''Pop up for invalid entries'''
+        dialog = MDDialog(
+            MDDialogSupportingText(
+                text="Invalid Entries",
+                halign="left",
+            ),           
+        )
+        dialog.open()
+    
+    
+
+    def successful_signup_popup(self):
+        '''Pop up for invalid entries'''
+        dialog = MDDialog(
+            MDDialogSupportingText(
+                text="You have successfully created an account.",
+                halign="left",
+            ), 
+            size_hint = (.9, None)
+        )
+        dialog.open()           
+
+    def email_exists_popup(self):
+        '''Pop up when email entered already exists'''
+        dialog = MDDialog (            
+            MDDialogSupportingText(
+                text="You have already have an account",
+                halign="left",
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Try Again"),
+                    style="text",
+                    on_press=lambda *args: self.dismiss_dialog(dialog)
+
+                ),
+                MDButton(
+                    MDButtonText(text="Log In"),
+                    style="text",
+                    on_press=lambda *args: self.goto_login(dialog)
+
+                ),
+                spacing="8dp",
+                
+            ),
+            size_hint = (.9, None)
+        )
+        dialog.open()
+
+    def dismiss_dialog(self, dialog):
+        dialog.dismiss()
+    
+    def goto_login(self, dialog):
+        self.manager.current = 'login'
+        dialog.dismiss()
+
+    def enable_signup_btn(self):
+        self.ids.signupbtn.disabled = False
     
 class LoginScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -293,6 +365,14 @@ class LoginScreen(BaseScreen):
 class DashboardScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+        self.db = MySQLdb()
+
+    def log_out(self):
+        logout = self.db.log_out_user()
+        if logout:
+            print('Logout Success')
+        else:
+            print('Log out unsuccessful')
 
     def toggle_nav_drawer(self):
         self.ids.top_app_bar.ids.nav_drawer.toggle_nav_drawer()
@@ -303,6 +383,10 @@ class DashboardScreen(BaseScreen):
     def switch_to_tracker(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('tracker')
+
+    def switch_to_piggy(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('piggy')
 
 class CreateGoalScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -343,12 +427,68 @@ class DrawerItem(MDNavigationDrawerItem):
     def on_trailing_text_color(self, instance, value):
         self._trailing_text_obj.text_color = value
 
+
+
 class TrackerScreen(BaseScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.db = MySQLdb()
+
+        self.update_data()  # Update content initially
+
+    def update_data(self):
+        user_id = self.db.get_logged_in_userid()
+        items = self.db.get_expenses(user_id)
+        
+        expense_table = self.ids.expense_table
+        expense_table.data = []
+
+        if items is None:
+            print("No items retrieved from the database.")
+            return
+
+        for expense_id, user_id, expense_name, expense_amount in items:
+            expense_table.data.append(
+                {
+                    "viewclass": "MDLabel",
+                    "text": f"{expense_id}   {expense_name}  Php{expense_amount}",
+                    "adaptive_height": True,
+                    "theme_text_color": "Primary",
+                    "font_style": "Body",
+                    "role": "large"
+                }
+            )
+        
+        print("Data has been updated.")
+
+class CreateexpensesScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+        self.db = MySQLdb()
+        
+    def add_expenses(self):
+        user_id = self.db.get_logged_in_userid()
+        expense_name = self.ids.expense_name.text
+        expense_amount = self.ids.expense_amount.text
 
+        if expense_name != '' and expense_amount != '':
+            self.db.insert_expenses(user_id, expense_name, expense_amount) # Inserting new expenses
+            expenses = self.db.get_expenses(user_id)              # getting the expenses based on current user_id
+            self.update_trackerscreen_content()                   # clearing the expense_table 
+            self.ids.expense_name.text = ''
+            self.ids.expense_amount.text = ''
+            if expenses:
+                # Switch to the TrackerScreen to update the display 
+                app = MDApp.get_running_app()                
+                app.switch_to_screen('tracker')
+            else:
+                print("Expenses not recorded")
+                return True, print("Expenses has been recorded")
 
-
+    def update_trackerscreen_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('tracker')
+        trackerscreen.update_data()
 
 
     def switch_to_dashboard(self):
@@ -370,6 +510,10 @@ class PiggyScreen(BaseScreen):
 class HistoryScreen_Piggy(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+    
+    def switch_to_piggy(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('piggy')
 
     
 

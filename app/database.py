@@ -96,9 +96,9 @@ class MySQLdb:
         self.cursor.execute("SELECT * FROM users WHERE keeploggedin = 1")
         logged = self.cursor.fetchall()
         if logged:
-            return False
-        else:
             return True
+        else:
+            return False
 
     def log_out_user(self):
         """Triggered when the user logsout"""
@@ -121,40 +121,53 @@ class MySQLdb:
             self.db.commit()
 
         except Exception as e:
-            print("Error creating goal:", e)
-            return False 
-
+            print("Error creating goal:", e) 
+            
     #####################################FOR EXPENSESS################################
 
     def create_expenses(self):  
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS expenses
                     (ID     INT     PRIMARY KEY NOT NULL,
-                    name    TEXT                NOT NULL,
-                    price   INT                 NOT NULL)""")
+                    expense_name    TEXT                NOT NULL,
+                    expense_amount   INT                 NOT NULL)""")
     
-    def insert_expenses(self, item_id, item_name, item_price):
-        sql = "INSERT INTO expenses VALUES (%s, %s, %s)"
-        values = (item_id, item_name, item_price)
-        self.cursor.execute (sql, values)
-        self.db.commit()
-
-    def delete_expenses(self, item_id):
+    def insert_expenses(self, user_id, expense_name, expense_amount):
+        try:
+            sql = "INSERT INTO expenses (user_id, expense_name, expense_amount) VALUES (%s, %s, %s)"
+            values = (user_id, expense_name, expense_amount)
+            expenses = self.cursor.execute (sql, values)
+            self.db.commit()
+            return True, expenses
+        
+        except Exception as e:
+            # Handle any exceptions that occur during the insertion process
+            self.db.rollback()  # Rollback the transaction in case of an error
+            print("Error inserting expense:", e)
+         
+    def delete_expenses(self, expense_id):
         sql = "DELETE FROM expenses WHERE id=%s"
-        value = (item_id)
+        value = (expense_id)
         self.cursor.execute (sql, value)
         self.db.commit()
 
-    def get_expenses(self):
-        self.cursor.execute("SELECT * FROM expenses")
-        expenses = self.cursor.fetchall()
-        if expenses:
-            return expenses[0][0]
-        else:
+    def get_expenses(self, user_id):
+        try:           
+            self.cursor.execute("SELECT * FROM expenses WHERE user_id=%s", (user_id,))
+            expenses = self.cursor.fetchall()
+            self.db.commit()
+            if expenses:  # Check if there are expenses
+                return expenses  # Return the first expense
+            else:
+                print("No expenses found for with user ID:", user_id)
+                return None
+        except Exception as e:
+            print("Error fetching expenses:", e)
             return None
+
 
     
     def total_spending(self):
-        self.cursor.execute("SELECT SUM(price) FROM expenses;")
+        self.cursor.execute("SELECT SUM(amount) FROM expenses;")
         sum = self.cursor.fetchone()
         return sum
 
