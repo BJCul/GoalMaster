@@ -1,4 +1,5 @@
 from kivy.lang import Builder
+from datetime import datetime
 # from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
@@ -397,12 +398,24 @@ class CreateGoalScreen(BaseScreen):
         user_id = self.db.get_logged_in_userid()  
         goal_name = self.ids.goal_name.text
         goal_amount = self.ids.goal_amount.text
-        goal_duration = self.ids.goal_duration.text
-        create_goal = self.db.create_goals(user_id, goal_name, goal_amount, goal_duration)
-        if create_goal:
+        goal_duration = self.ids.goal_duration.text   
+        if goal_name != '' and goal_amount != '' and goal_duration != '':
+            self.db.create_goals(user_id, goal_name, goal_amount, goal_duration)
+            goals = self.db.get_goals(user_id)
+            self.update_piggy_content
             print('goal created successfully')
-        if not create_goal:
-            print('goal not created')
+            if goals:
+                print('created successfully')
+            else: 
+                print('goal not created')
+        else: 
+            print('Input the text fields')        
+
+    def update_piggy_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('piggy')
+        trackerscreen.update_piggy_data()
+
 
 
 class DrawerLabel(MDBoxLayout):
@@ -525,6 +538,59 @@ class CreateexpensesScreen(BaseScreen):
 class PiggyScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
+        self.db = MySQLdb()
+
+        self.update_piggy_data()
+
+    def update_piggy_data(self):
+        user_id = self.db.get_logged_in_userid()    
+        goals = self.db.get_goals(user_id)   
+        
+        # Update the goal name
+        print("Goal data:", goals)
+        if goals:
+            goal_record = goals[0]
+            print("Goal record:", goal_record) 
+
+        # Goals containing record inside so typical indexing hindi gagana
+        goal_id = goal_record[0]
+        user_id = goal_record[1]
+        _goal_name = goal_record[2]
+        _goal_duration = goal_record[3]
+        _goal_amount = goal_record[4]
+
+        print("Goal:", goal_id, user_id, _goal_name, _goal_duration, _goal_amount)
+
+        if goals:
+            goal_name = _goal_name # return the goal name
+            updated_goal_name = goal_name.upper()  # Convert to uppercase
+            
+            # Update the goal name label
+            goal_name_label = self.ids.goal_name
+            goal_name_label.text = updated_goal_name
+        
+        try:
+            if goals:
+                goal_amount = _goal_amount
+                formatted_goal_amount = "{:,.0f}".format(_goal_amount)
+                goal_amount_label = self.ids.goal_amount
+                goal_amount_label.text = formatted_goal_amount
+
+        except ValueError:
+            print("Invalid goal amount:", goal_amount)
+            # Handle the case where the input is not a valid number
+
+        # Update the goal duration
+        try:
+            if goals:
+                goal_duration = _goal_duration
+                formatted_deadline = _goal_duration.strftime("%B %d, %Y")
+                goal_duration_label = self.ids.deadline
+                goal_duration_label.text = formatted_deadline  # Update the goal duration label
+                # goal_duration_label.text = f"{goal_duration}"
+        except IndexError:
+            print("Invalid goal duration or no goals found.")
+            # Handle the case where the goal duration index is out of range or no goals are found
     
     def switch_to_dashboard(self):
         app = MDApp.get_running_app()

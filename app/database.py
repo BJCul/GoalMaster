@@ -119,9 +119,26 @@ class MySQLdb:
         try:
             self.cursor.execute (sql, values)
             self.db.commit()
+            return True, user_id,goal_name, goal_amount, goal_duration
 
         except Exception as e:
             print("Error creating goal:", e) 
+
+    def get_goals(self, user_id):
+        try:           
+            self.cursor.execute("SELECT * FROM goals WHERE user_id=%s ORDER BY goal_id DESC LIMIT 1", (user_id,))
+            goals = self.cursor.fetchall()
+            self.db.commit()
+            if goals:  # Check if there are goal
+                return goals  # Return the first goal
+            else:
+                print("No goals found for with user ID:", user_id)
+                return None
+            
+        except Exception as e:
+            print("Error fetching goals:", e)
+            return None
+        
             
     #####################################FOR EXPENSESS################################
 

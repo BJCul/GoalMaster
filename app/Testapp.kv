@@ -135,7 +135,8 @@
             halign: 'center'
             on_press: 
                 root.add_goal()
-                root.manager.current = 'dashboard' 
+                root.update_piggy_content()
+                root.manager.current = 'dashboard'
             MDButtonText:
                 text: "Start Journey"
                 theme_text_color: "Custom"
@@ -830,7 +831,7 @@
                     
                         
                     MDLabel:
-                        id: savings_amount
+                        id: goal_amount
                         text: 'P10 000'
                         halign: 'center'
                         pos_hint: {'center_y': 0.65}
@@ -840,6 +841,7 @@
                     
 
                     MDLabel:
+                        
                         text: 'Deadline'
                         halign: 'center'
                         pos_hint: {'center_y': 0.39}
@@ -848,7 +850,7 @@
 
 
                     MDLabel:
-                        id: dline_date
+                        id: deadline
                         text: 'Feb 17, 2024'
                         halign: 'center'
                         pos_hint: {'center_y': 0.19}
