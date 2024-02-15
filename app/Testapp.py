@@ -434,9 +434,19 @@ class TrackerScreen(BaseScreen):
         super().__init__(**kwargs)
         self.db = MySQLdb()
 
-        self.update_data()  # Update content initially
+        self.update_expenses_data()  # Update content initially
+        self.update_total_data()
 
-    def update_data(self):
+    def update_total_data(self):
+        expense_total_label = self.ids.expense_total
+        total_spending_tuple = self.db.total_spending()
+
+        total_spending = total_spending_tuple[0]
+
+        expense_total_label.text = f"Total Expenses: Php{total_spending}"
+
+    def update_expenses_data(self):
+        self.update_total_data()
         user_id = self.db.get_logged_in_userid()
         items = self.db.get_expenses(user_id)
         
@@ -484,11 +494,28 @@ class CreateexpensesScreen(BaseScreen):
             else:
                 print("Expenses not recorded")
                 return True, print("Expenses has been recorded")
+    
+    def delete_expense(self):
+        expense_id = self.ids.expense_id.text
+        
+
+        if expense_id != '':
+            expense_delete = self.db.delete_expenses(expense_id) # Delete new expenses
+            self.update_trackerscreen_content()                   # updating the expense_table 
+            self.ids.expense_id.text = ''
+
+            if expense_delete:
+                # Switch to the TrackerScreen to update the display 
+                app = MDApp.get_running_app()                
+                app.switch_to_screen('tracker')
+            else:
+                print("Expenses not Deleted")
+                return True, print("Expenses has been recorded")       
 
     def update_trackerscreen_content(self):
         screen_manager = self.manager
         trackerscreen = screen_manager.get_screen('tracker')
-        trackerscreen.update_data()
+        trackerscreen.update_expenses_data()
 
 
     def switch_to_dashboard(self):

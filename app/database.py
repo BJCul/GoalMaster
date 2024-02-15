@@ -145,10 +145,12 @@ class MySQLdb:
             print("Error inserting expense:", e)
          
     def delete_expenses(self, expense_id):
-        sql = "DELETE FROM expenses WHERE id=%s"
-        value = (expense_id)
+        sql = "DELETE FROM expenses WHERE expense_id=%s"
+        value = (expense_id,)
         self.cursor.execute (sql, value)
         self.db.commit()
+        return True 
+
 
     def get_expenses(self, user_id):
         try:           
@@ -167,7 +169,7 @@ class MySQLdb:
 
     
     def total_spending(self):
-        self.cursor.execute("SELECT SUM(amount) FROM expenses;")
+        self.cursor.execute("SELECT SUM(expense_amount) FROM expenses;")
         sum = self.cursor.fetchone()
         return sum
 

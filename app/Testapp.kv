@@ -612,7 +612,7 @@
                 type: 'large'
 
             MDLabel: 
-                id: total_expenses
+                id: expense_total
                 padding: 2     
                 size_hint: (1, None)
                 valign: "top"
@@ -738,11 +738,15 @@
                     text: "ID"
 
                 MDTextFieldHelperText:
-                    mode: "on_error"
-                    text: "Enter a number"   
+                    text: "Enter the number ID of a specific expense you want to delete"   
+            
             MDButton:
                 style: "elevated"
                 pos_hint: {"center_x": .6, "center_y": .3}
+                id: delete_btn
+                on_press: 
+                    root.delete_expense()
+
 
                 MDButtonIcon:
                     icon: "delete"
