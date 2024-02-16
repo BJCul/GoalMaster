@@ -9,6 +9,7 @@ from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.uix.widget import Widget
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.app import MDApp
 from kivy.properties import StringProperty
 from kivymd.uix.button import MDButton, MDButtonText
@@ -49,7 +50,8 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(PiggyScreen(name='piggy'))
         self.screen_manager.add_widget(AccountScreen(name='account'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
-        self.screen_manager.current = "login"
+        self.screen_manager.add_widget(HistoryScreen_Tracker(name='history_tracker'))
+        self.screen_manager.current = "startup"
 
         return self.screen_manager
     
@@ -347,8 +349,8 @@ class LoginScreen(BaseScreen):
         self.user_id = None
     
     def user_login(self):
-        email = self.ids.login_email.text
-        password = self.ids.login_password.text
+        email = self.ids.email.text
+        password = self.ids.password.text
         # check if user has press the keep me logged in check box
         if self.ids.keepmeloggedin.active == True:    
             keep_me_logged = True
@@ -376,8 +378,8 @@ class LoginScreen(BaseScreen):
                 print("Name:", name), print("Email:",email)
                 self.update_account_content(name, email)
 
-                self.ids.login_email.text = ''
-                self.ids.login_password.text=''
+                self.ids.email.text = ''
+                self.ids.password.text=''
                 return True, print("login success")
                         
             elif userid_ == False:
@@ -437,12 +439,30 @@ class DashboardScreen(BaseScreen):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
+        #self.update_dashboard_data()
+
     def log_out(self):
         logout = self.db.log_out_user()
         if logout:
             print('Logout Success')
         else:
             print('Log out unsuccessful')
+
+    def update_dashboard_data(self):
+        user_id = self.db.get_logged_in_userid() 
+        goals = self.db.get_goals(user_id)   
+
+        if goals:
+            goal_record = goals[0]
+            goal_id = goal_record[0]
+            print("Goal:", goal_id)                                        # Extract the goal_id from the first goal record
+            allowance = self.db.get_allowance(goal_id)           
+            # Update the allowance
+            allowance_value = allowance[0][0]  # Access the first element of the first tuple
+            allowance_label = self.ids.allowance  # Access the label widget
+            allowance_label.text = f"₱ {allowance_value}"  # Update the text of the label
+        else:
+            print("No goals found for the user.")
 
     def toggle_nav_drawer(self):
         self.ids.top_app_bar.ids.nav_drawer.toggle_nav_drawer()
@@ -467,11 +487,14 @@ class CreateGoalScreen(BaseScreen):
         user_id = self.db.get_logged_in_userid()  
         goal_name = self.ids.goal_name.text
         goal_amount = self.ids.goal_amount.text
-        goal_duration = self.ids.goal_duration.text   
-        if goal_name != '' and goal_amount != '' and goal_duration != '':
-            self.db.create_goals(user_id, goal_name, goal_amount, goal_duration)
+        goal_duration = self.ids.goal_duration.text 
+        allowance = self.ids.allowance.text  
+        if goal_name != '' and goal_amount != '' and goal_duration != '' and allowance != '':
+            self.db.create_goals(user_id, goal_name, goal_amount, goal_duration, allowance)
             goals = self.db.get_goals(user_id)
             self.update_piggy_content()
+            self.update_trackerscreen_content()
+            self.update_dashboard_content()
             print('goal created successfully')
             if goals:
                 print('created successfully')
@@ -484,6 +507,16 @@ class CreateGoalScreen(BaseScreen):
         screen_manager = self.manager
         trackerscreen = screen_manager.get_screen('piggy')
         trackerscreen.update_piggy_data()
+    
+    def update_dashboard_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('dashboard')
+        trackerscreen.update_dashboard_data()
+
+    def update_trackerscreen_content(self):
+        screen_manager = self.manager
+        tracker = screen_manager.get_screen('tracker')
+        tracker.update_allowance_data()
 
 
 
@@ -589,6 +622,7 @@ class TrackerScreen(BaseScreen):
         self.update_allowance_data()        # Update Allowance 
         #self.update_savings_data()         # Update Savings
 
+
     def add_expenses(self):
         self.dialog = DialogScreen()
         self.dialog.open()
@@ -631,7 +665,7 @@ class TrackerScreen(BaseScreen):
 
         total_spending = total_spending_tuple[0]
 
-        expense_total_label.text = f"Total Expenses: Php{total_spending}"
+        expense_total_label.text = f"Total Expenses: ₱ {total_spending}"
 
     def update_expenses_data(self):
         self.update_total_data()
@@ -649,7 +683,7 @@ class TrackerScreen(BaseScreen):
             expense_table.data.append(
                 {
                     "viewclass": "MDLabel",
-                    "text": f"{expense_id}   {expense_name}  Php{expense_amount}",
+                    "text": f"{expense_id}                      {expense_name}             ₱ {expense_amount}",
                     "adaptive_height": True,
                     "theme_text_color": "Primary",
                     "font_style": "Body",
@@ -662,6 +696,14 @@ class TrackerScreen(BaseScreen):
     def switch_to_dashboard(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('dashboard')
+
+    def switch_to_history_tracker(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('history_tracker')
+
+    def add_expenses(self):
+        self.dialog = DialogScreen()
+        self.dialog.open()
 
 class CreateexpensesScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -686,11 +728,11 @@ class CreateexpensesScreen(BaseScreen):
             else:
                 print("Expenses not recorded")
                 return True, print("Expenses has been recorded")
-    
+            
+
     def delete_expense(self):
         expense_id = self.ids.expense_id.text
         
-
         if expense_id != '':
             expense_delete = self.db.delete_expenses(expense_id) # Delete new expenses
             self.update_trackerscreen_content()                   # updating the expense_table 
@@ -719,7 +761,7 @@ class PiggyScreen(BaseScreen):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
-        self.update_piggy_data()
+        #self.update_piggy_data()
 
     def update_piggy_data(self):
         user_id = self.db.get_logged_in_userid()    
@@ -737,10 +779,11 @@ class PiggyScreen(BaseScreen):
         _goal_name = goal_record[2]
         _goal_duration = goal_record[3]
         _goal_amount = goal_record[4]
+        _allowance = goal_record[5]
 
-        print("Goal:", goal_id, user_id, _goal_name, _goal_duration, _goal_amount)
+        print("Goal:", goal_id, user_id, _goal_name, _goal_duration, _goal_amount, _allowance)
 
-        if goals:
+        if goal_record:
             goal_name = _goal_name # return the goal name
             updated_goal_name = goal_name.upper()  # Convert to uppercase
             
@@ -794,8 +837,6 @@ class HistoryScreen_Tracker(BaseScreen):
     def switch_to_tracker(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('tracker')
-    
-
     
 
 if __name__ == "__main__":
