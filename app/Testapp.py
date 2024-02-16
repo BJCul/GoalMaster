@@ -23,6 +23,8 @@ from kivymd.uix.label import MDLabel
 
 
 Window.size = (360, 640)
+Window.top = 100
+Window.left = 1000
 
 class MyApp(MDApp):
     def __init__(self, **kwargs):
@@ -45,8 +47,9 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(CreateexpensesScreen(name='createexpenses'))
         self.screen_manager.add_widget(TrackerScreen(name='tracker'))
         self.screen_manager.add_widget(PiggyScreen(name='piggy'))
+        self.screen_manager.add_widget(AccountScreen(name='account'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
-        self.screen_manager.current = "startup"
+        self.screen_manager.current = "login"
 
         return self.screen_manager
     
@@ -117,6 +120,7 @@ class SignupScreen(BaseScreen):
                 self.ids.name.text=''
                 self.ids.email.text = ''
                 self.ids.password.text=''
+                self.update_account_content(name, email)
                 return True, self.successful_signup_popup(), print("do not exist")
             
             elif self.db.check_email(email) == True: # Pop up the email exist then return false
@@ -125,6 +129,11 @@ class SignupScreen(BaseScreen):
 
         else:
             self.invalid_popup()
+    
+    def update_account_content(self, name, email):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('account')
+        trackerscreen.update_account_data(name, email)
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
@@ -218,10 +227,10 @@ class SignupScreen1(BaseScreen):
         # Check if user input have info
         if email != '' and password != '' and name != '':
             if self.db.check_email(email) == False: # Check email in the db if exist, if not create user then return True
-                self.db.create_user(name,email,password)
+                self.db.create_user(name,email,password)          
                 self.ids.name.text=''
                 self.ids.email.text = ''
-                self.ids.password.text=''
+                self.ids.password.text=''                
                 return True, self.successful_signup_popup(), print("do not exist")
             
             elif self.db.check_email(email) == True: # Pop up the email exist then return false
@@ -230,6 +239,7 @@ class SignupScreen1(BaseScreen):
 
         else:
             self.invalid_popup()
+
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
@@ -291,6 +301,43 @@ class SignupScreen1(BaseScreen):
 
     def enable_signup_btn(self):
         self.ids.signupbtn.disabled = False
+
+class AccountScreen(BaseScreen):
+    def __init__(self, **kwags):
+        super().__init__(**kwags) 
+        self.db  = MySQLdb()
+
+        self.update_account_data
+
+    def update_account_data(self, name, email):
+        #users = self.db.get_user(user_id)
+        name_label = self.ids.name
+        email_label = self.ids.email
+       
+        # Update the widget values
+        name_label.text = f"{name}"
+        email_label.text = f"{email}"
+    
+    def change_name(self):
+        user_id = self.db.get_logged_in_userid()
+        new_name = self.ids.name.text
+        updated_name = self.db.change_account_name(user_id,new_name)
+        print("Updated name:", updated_name)
+        self.ids.name.text = new_name
+
+    def change_email(self):
+        user_id = self.db.get_logged_in_userid()
+        new_email = self.ids.email.text
+        updated_email = self.db.change_account_email(user_id,new_email)
+        print("Updated email:", updated_email)
+        self.ids.email.text = new_email
+    
+    def change_password(self):
+        user_id = self.db.get_logged_in_userid()
+        new_password = self.ids.password.text
+        self.db.change_account_name(user_id,new_password)
+        self.ids.password.text = new_password
+        self.ids.password.password = True
     
 class LoginScreen(BaseScreen):
     def __init__(self, **kwags):
@@ -308,21 +355,43 @@ class LoginScreen(BaseScreen):
         else: 
             keep_me_logged = False
         # check if users has an account 
-        if email != '' and password != '':            
-            userid = self.db.get_user(email, password, keep_me_logged)
+        if email != '' and password != '':
+            userid_ = self.db.get_user(email, password, keep_me_logged)            
     
             # validate the user
-            if userid == True:
+            if userid_ == True:
                 self.successful_login = True
+                userid = self.db.get_users(email, password, keep_me_logged)
+
+                print("User ID:", userid)
+                userid1 = userid[0]
+                userid2 = userid[1]
+                print("Name:", userid1), print("Email:",userid2)
+                
+                users_info = self.db.get_users_info(userid1)
+
+                name = users_info[0][0]
+                email = users_info[0][1]
+
+                print("Name:", name), print("Email:",email)
+                self.update_account_content(name, email)
+
                 self.ids.login_email.text = ''
                 self.ids.login_password.text=''
                 return True, print("login success")
-            
-            elif userid == False:
+                        
+            elif userid_ == False:
                 self.invalid_popup()
     
             else:
                 self.invalid_popup()
+        else:
+            self.invalid_popup()
+
+    def update_account_content(self, name, email):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('account')
+        trackerscreen.update_account_data(name, email)
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
@@ -402,7 +471,7 @@ class CreateGoalScreen(BaseScreen):
         if goal_name != '' and goal_amount != '' and goal_duration != '':
             self.db.create_goals(user_id, goal_name, goal_amount, goal_duration)
             goals = self.db.get_goals(user_id)
-            self.update_piggy_content
+            self.update_piggy_content()
             print('goal created successfully')
             if goals:
                 print('created successfully')
@@ -483,6 +552,10 @@ class TrackerScreen(BaseScreen):
             )
         
         print("Data has been updated.")
+
+    def switch_to_dashboard(self):
+        app = MDApp.get_running_app()
+        app.switch_to_screen('dashboard')
 
 class CreateexpensesScreen(BaseScreen):
     def __init__(self, **kwags):

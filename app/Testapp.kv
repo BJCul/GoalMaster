@@ -1,10 +1,5 @@
 <StartupScreen>:
-    name: 'startup'
-    MDIconButton:
-        icon: "arrow-left"
-        pos_hint: {"center_y": 0.95}
-        theme_text_color: "Custom"
-        on_press: root.manager.current = 'dashboard'   
+    name: 'startup'  
     Image:
         source: "images\GoalMaster_logo1.png"
         pos_hint: {"center_x": 0.5, "center_y": 0.70}
@@ -125,7 +120,16 @@
             text: "2025-12-31"
             mode: 'outlined' 
             MDTextFieldHintText:
-                text: "Deadline/Duration"
+                text: "Deadline"
+
+        MDTextField:
+            id: allowance
+            size_hint_x: .7
+            pos_hint: {"center_x": .5, "top": .37}           
+            text: "30000"
+            mode: 'outlined' 
+            MDTextFieldHintText:
+                text: "Allowance"
             
         MDButton:
             style: "tonal"
@@ -416,6 +420,8 @@
             MDTopAppBarTrailingButtonContainer:
                 MDActionTopAppBarButton:
                     icon: "account"
+                    on_release:
+                        root.manager.current = 'account'
         
         MDFloatLayout:
             MDCard:
@@ -589,79 +595,120 @@
     name: 'tracker'
     Screen:
 
-    BoxLayout:
-        orientation: "vertical"
-        
+    MDBoxLayout:
+        orientation: 'vertical'
+
         MDTopAppBar: 
             type: 'small'
+            theme_bg_color: 'Custom'
+            md_bg_color: 'b3cde0'
 
             MDTopAppBarLeadingButtonContainer:
                 MDActionTopAppBarButton:
                     icon: "arrow-left"
-                    on_press: root.manager.current = 'dashboard'
+                    md_icon_color: "005B96"
+                    on_release: root.switch_to_dashboard()
             
-        MDBoxLayout:
-            orientation: "vertical"
-
-            MDLabel: 
-                padding: 2   
-                size_hint: (1, None)
-                valign: "top"
-                halign: "center"
-                font_style: "Headline"
-                text: "EXPENSES"
-                type: 'large'
-
-            MDLabel: 
-                id: expense_total
-                padding: 2     
-                size_hint: (1, None)
-                valign: "top"
-                halign: "center"
-                font_style: "Body"
-                text: "Total Expenses: Php 500"
-
-            MDFloatLayout:
+            MDTopAppBarTitle:
+                text: "Daily Expenses"
+                theme_text_color: "Custom"
+                text_color: "005B96"
+                pos_hint: {"center_x": .5}
+            
+            MDTopAppBarTrailingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "history"
+                    on_release: root.switch_to_history_tracker()
         
-                MDCard:
-                    size_hint: None, None
-                    size: "340dp", "300dp"  
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-                    MDRecycleView:   
-                        id: expense_table
-                        key_viewclass: 'viewclass'
-                        key_size: 'height'
-
-                        RecycleBoxLayout:
-                            padding: dp(10)
-                            spacing: dp(10)
-                            default_size: None, dp(30)
-                            default_size_hint: 1, None
-                            size_hint_y: None
-                            height: self.minimum_height
-                            orientation: "vertical"
-            
-            MDBottomAppBar:
-                allow_hidden: True
-                type: "medium"
+        MDRelativeLayout:
+            MDCard:
+                style: "filled"
+                pos_hint: {"center_x": .50, "center_y": .33}
+                padding: "4dp"
+                size_hint: None, None
+                size: "300dp", "350dp"
                 theme_bg_color: 'Custom'
-                md_button_color: 'b3cde0'
-                
+                md_bg_color: 'b3cde0'
 
-                MDFabBottomAppBarButton:
-                    pos_hint: {"center_x": .5}
-                    icon: "plus"
+                MDRelativeLayout:
+                    MDLabel:
+                        text: 'No.'
+                        #halign: 'center'
+                        pos_hint: {'center_x': 0.6, 'center_y':0.92}
+
                     
-                    on_press: root.manager.current = 'createexpenses'
-            #MDBoxLayout:
-                #spacing: 20
-                #size_hint: (1, None)
+                    MDLabel:
+                        text: 'Item'
+                        #halign: 'center'
+                        pos_hint: {'center_x': 1.3, 'center_y':0.92}
+                    
+                    MDLabel:
+                        text: 'Price'
+                        #halign: 'center'
+                        pos_hint: {'center_x': 2.1, 'center_y':0.92}
+                    
+                    MDDivider:
+                        size_hint_x: None
+                        width: 345
+                        pos_hint: {'center_x': 1, 'center_y': .86}
+                        theme_bg_color: 'Custom'
+                        color: '000000'
 
-                #MDIconButton: 
-                    #icon: "plus"
-                    #style: "filled"
-                    #on_press: root.manager.current = 'createexpenses'
+
+                MDRecycleView:   
+                    id: expense_table
+                    key_viewclass: 'viewclass'
+                    key_size: 'height'
+                    theme_bg_color: "Custom"
+                    md_bg_color: "ffffff"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+
+                    RecycleBoxLayout:
+                        padding: dp(10)
+                        spacing: dp(10)
+                        default_size: None, dp(100)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: "vertical"
+                        
+
+                   
+
+        MDRelativeLayout:
+            
+            MDCard:
+                style: "filled"
+                pos_hint: {"center_x": 0.5, "center_y": .47}
+                padding: "2dp"
+                size_hint: None, None
+                size: "270dp", "120dp"
+                theme_bg_color: 'Custom'
+                md_bg_color: 'D7E5EF' #'a1c1d9'
+
+                MDRelativeLayout:
+                    MDLabel:
+                        id: expense_total
+                        text: 'Total: P'
+                        pos_hint: {'center_x': 0.55, 'center_y': 0.8}
+                        
+                    MDLabel:                      
+                        text: 'Allowance: P'
+                        halign: 'center'
+                        pos_hint: {'center_x': 0.23, 'center_y': 0.5}
+
+                    MDLabel:
+                        text: 'Savings: P' 
+                        halign: 'center'
+                        pos_hint: {'center_x': 0.19, 'center_y': 0.2}
+        
+            MDRelativeLayout:
+                MDFabButton:
+                    icon: 'plus'
+                    style: 'small'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.15}
+                    on_release: app.add_expenses()
+
 
 <CreateexpensesScreen>
     name: 'createexpenses'
@@ -908,6 +955,107 @@
                     on_press: root.switch_to_piggy()
                     theme_bg_color: 'Custom'
                     md_bg_color: 'ffffff'
+
+
+<AccountScreen>
+    name: 'account'
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar: 
+            type: 'small' 
+            theme_bg_color: 'Custom'
+            md_bg_color: 'b3cde0'
+
+            MDTopAppBarLeadingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    md_icon_color: "005B96"
+                    on_release: 
+                        root.manager.current = 'dashboard'
+            
+            MDTopAppBarTitle:
+                text: "My Account"
+                theme_text_color: "Custom"
+                text_color: "005B96"
+                pos_hint: {"center_x": .5}
+
+
+            
+        MDFloatLayout:
+            orientation: "vertical"
+            size_hint_x: .8            
+
+            MDLabel:
+                id: name_label
+                pos_hint: {"center_x": .6, "center_y": .95}
+                text: "Account name:"
+            
+            MDTextField:
+                id: name
+                pos_hint: {"center_x": .6, "center_y": .88}
+                text: "James Alcantara"
+            
+            MDButton:
+                style: "elevated"
+                pos_hint: {"center_x": .6, "center_y": .77}
+                on_press: 
+                    root.change_name()
+
+                MDButtonIcon:
+                    icon: "plus"
+                    theme_icon_color: "Custom"
+                    icon_color: "blue"
+
+                MDButtonText:
+                    text: "Change name"
+
+            MDLabel:
+                id: email_label
+                pos_hint: {"center_x": .6, "center_y": .67}
+                text: "Email:"
+            
+            MDTextField:
+                id: email
+                pos_hint: {"center_x": .6, "center_y": .60}
+                text: "jamesalcantara@gmail.com"
+            
+            MDButton:
+                style: "elevated"
+                pos_hint: {"center_x": .6, "center_y": .49}
+                on_press: root.change_email()
+
+                MDButtonIcon:
+                    icon: "plus"
+                    theme_icon_color: "Custom"
+                    icon_color: "blue"
+
+                MDButtonText:
+                    text: "Change email"     
+
+            MDLabel:
+                id: password_label
+                pos_hint: {"center_x": .6, "center_y": .39}
+                text: "Password:"       
+
+            MDTextField:
+                id: password
+                pos_hint: {"center_x": .6, "center_y": .32}
+                text: "**********"
+            
+            MDButton:
+                style: "elevated"
+                pos_hint: {"center_x": .6, "center_y": .21}
+                id: delete_btn
+                on_press: root.change_password()
+
+                MDButtonIcon:
+                    icon: "delete"
+                    theme_icon_color: "Custom"
+                    icon_color: "blue"
+
+                MDButtonText:
+                    text: "Change Password"
 
 
 

@@ -54,8 +54,7 @@ class MySQLdb:
                 return False
             else:
                 return True
-
-
+            
     def get_user(self, email, password, keepmelogged):
         """Get the user when logging in to the system"""
         self.cursor.execute("SELECT id FROM users WHERE email = %s AND password = %s", (email, password))
@@ -71,6 +70,69 @@ class MySQLdb:
             return True
         else:
             return False
+
+
+
+    def get_users(self, email, password, keepmelogged):
+        """Get the user when logging in to the system"""
+        self.cursor.execute("SELECT id FROM users WHERE email = %s AND password = %s", (email, password))
+        user_id = self.cursor.fetchall()
+        if user_id:
+            self.cursor.execute("UPDATE users SET loggedin = 0 WHERE loggedin = 1")
+            if keepmelogged:
+                self.cursor.execute("UPDATE users SET loggedin = 1, keeploggedin = 1 WHERE id = %s", (user_id[0][0],))
+            else:
+                self.cursor.execute("UPDATE users SET loggedin = 1 WHERE id = %s", (user_id[0][0],))
+
+            self.db.commit()
+            return user_id[0][0], True
+        else:
+            return False
+        
+    def get_users_info(self, user_id):
+        try:           
+            self.cursor.execute("SELECT name, email FROM users WHERE id=%s", (user_id,))
+            users_info = self.cursor.fetchall()
+            if users_info:  # Check if there are users
+                return users_info  # Return the users_info
+            else:
+                print("No users found for with user ID:", user_id)
+                return None
+        except Exception as e:
+            print("Error fetching users:", e)
+            return None
+
+    def change_account_name(self, user_id, new_name):
+        try:
+            # Execute the SQL query to update the name
+            self.cursor.execute("UPDATE users SET name = %s WHERE id = %s", (new_name, user_id))
+            self.db.commit()            
+            # Retrieve the updated name from the database
+            self.cursor.execute("SELECT name FROM users WHERE id = %s", (user_id,))
+            updated_name = self.cursor.fetchone()[0]  # Fetch the first column of the first row
+            return updated_name
+        except Exception as e:
+            print("Error updating name:", e)
+            self.db.rollback()
+
+    def change_account_email(self, user_id, new_email):
+        try:
+            self.cursor.execute("UPDATE users SET email = %s WHERE id = %s", (new_email, user_id))
+            self.db.commit()
+            self.cursor.execute("SELECT email FROM users WHERE id = %s", (user_id,))
+            updated_email = self.cursor.fetchone()[0]  # Fetch the first column of the first row
+            return updated_email
+        except Exception as e:
+            print("Error updating email:", e)
+            self.db.rollback()
+
+    def change_account_password(self, user_id, new_password):
+        try:
+            self.cursor.execute("UPDATE users SET password = %s WHERE id = %s", (new_password, user_id))
+            self.db.commit()
+        except Exception as e:
+            print("Error updating password:", e)
+            self.db.rollback()
 
     
     def get_logged_in_user_email(self):
@@ -111,6 +173,7 @@ class MySQLdb:
                     (ID     INT     PRIMARY KEY AUTO_INCREMENT,
                     goal_name    TEXT                NOT NULL,
                     goal_amount   INT                 NOT NULL,
+                    allowance      INT                  NOT NULL,
                     goal_duration  date                )""")
     
     def create_goals(self,user_id,goal_name, goal_amount, goal_duration):
