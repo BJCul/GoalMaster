@@ -1,5 +1,4 @@
 import mysql.connector
-import bcrypt
 import datetime
 
 class MySQLdb:

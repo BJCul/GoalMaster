@@ -508,7 +508,6 @@
                         role: "small"
 
                         MDLabel:
-                            id: savings
                             text: "Php 500"
                             adaptive_size: True
                             color: "blue"
@@ -590,7 +589,7 @@
         padding: "6dp", 0, "16dp", 0
         theme_line_height: "Custom"
         line_height: 0
-
+        
 <TrackerScreen>
     name: 'tracker'
     Screen:
@@ -648,7 +647,7 @@
                     
                     MDDivider:
                         size_hint_x: None
-                        width: 345
+                        width: 290
                         pos_hint: {'center_x': 1, 'center_y': .86}
                         theme_bg_color: 'Custom'
                         color: '000000'
@@ -672,8 +671,6 @@
                             height: self.minimum_height
                             orientation: "vertical"
 
-                            
-
                         
         MDRelativeLayout:
             
@@ -690,7 +687,6 @@
                     MDLabel:
                         id: expense_total
                         text: 'Total: P'
-                        halign: 'center'
                         pos_hint: {'center_x': 0.5, 'center_y': 0.8}
                         
                     MDLabel:
@@ -710,8 +706,327 @@
                     icon: 'plus'
                     style: 'small'
                     pos_hint: {'center_x': 0.5, 'center_y': 0.15}
-                    on_release: root.add_expenses()        
+                    on_release: root.manager.current = 'createexpenses'
 
+<DialogScreen>
+    
+    size_hint_x: None
+    width: 400
+    
+    MDDialogHeadlineText:
+        text: 'Add Expenses'
+    
+    MDDialogContentContainer:
+        orientation: 'vertical'
+        spacing: "15dp"
+
+        MDTextField:
+            mode: 'filled'
+            MDTextFieldHintText:
+                text: 'Item'
+
+        MDTextField:
+            mode: 'filled'
+            MDTextFieldHintText:
+                text: 'Price'
+        
+
+        MDTextField:
+            mode: 'filled'
+            on_focus: root.open_menu(self)
+            id: category
+            MDTextFieldHintText:
+                text: 'Category'
+
+                
+    
+    MDDialogButtonContainer:
+        spacing: '100dp'
+
+        MDButton:
+            style: 'text'
+            on_release: root.cancel_dialog()
+            MDButtonText:
+                text: 'Cancel'
+        
+        MDButton:
+            style: 'text'
+            on_release: root.confirm_exp()
+            MDButtonText:
+                text: 'Add'
+
+                        
+
+
+<PiggyScreen>
+    name: 'piggy'
+    Screen:
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+
+        MDTopAppBar: 
+            type: 'small'
+            theme_bg_color: 'Custom'
+            md_bg_color: 'b3cde0'
+
+
+            MDTopAppBarLeadingButtonContainer:
+
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    md_icon_color: "005B96"
+                    on_release: root.switch_to_dashboard()
+            
+            MDTopAppBarTitle:
+                text: "Piggy Bank"
+                theme_text_color: "Custom"
+                text_color: '111416'
+                pos_hint: {"center_x": .5}
+
+        
+
+        MDFloatLayout:
+            #pos_hint: {"center_x": .50, "center_y": .7}
+            MDLabel:
+                id: goal_name
+                text: "iPhone"
+                text_color: "011F4B"
+                halign: 'center'
+                pos_hint: {"center_y": 0.8}
+                font_style: "Headline"
+                role: "large"
+                bold: "True"
+
+        MDFloatLayout:
+        
+            FitImage:
+                source: "images/piggy_pic.png"
+                size_hint_y: 1
+                pos_hint: {"center_y": 1.2, 'center_x': 0.5}
+                radius: "10dp", "10dp", 0, 0
+                size_hint: None, None
+                size: dp(240), dp(240)  # Set the desired size
+
+            MDCard:
+                style: 'filled'
+                pos_hint: {"center_x": .50, "center_y": .04}
+                padding: "4dp"
+                size_hint: None, None
+                size: "300dp", "150dp"
+                theme_bg_color: 'Custom'
+                md_bg_color: 'b3cde0'
+                
+                MDRelativeLayout:
+                    MDLabel:
+                        text: 'Savings'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.88}
+                        font_style: "Title"
+                        role: "medium"
+                    
+                        
+                    MDLabel:
+                        id: goal_amount
+                        text: 'P10 000'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.65}
+                        font_style: "Headline"
+                        role: "large"
+                        bold: "True"
+                    
+
+                    MDLabel:
+                        
+                        text: 'Deadline'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.39}
+                        font_style: "Title"
+                        role: "medium"
+
+
+                    MDLabel:
+                        id: deadline
+                        text: 'Feb 17, 2024'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.19}
+                        font_style: "Headline"
+                        role: "medium"
+                        bold: "True"
+
+        MDFloatLayout:
+         
+            MDButton:
+                style: 'text'
+                pos_hint: {"center_x": 0.5, "center_y": 0.2}
+                on_release: root.switch_to_history_piggy()
+                MDButtonText:
+                    text: "Transactions"
+                    font_style: "Title"
+                    role: "large"
+                    theme_text_color: 'Custom'
+                    text_color:'grey'
+
+<DialogScreen>
+    
+    size_hint_x: None
+    width: 400
+    
+    MDDialogHeadlineText:
+        text: 'Add Expenses'
+    
+    MDDialogContentContainer:
+        orientation: 'vertical'
+        spacing: "15dp"
+
+        MDTextField:
+            mode: 'filled'
+            MDTextFieldHintText:
+                text: 'Item'
+
+        MDTextField:
+            mode: 'filled'
+            MDTextFieldHintText:
+                text: 'Price'
+        
+
+        MDTextField:
+            mode: 'filled'
+            on_focus: root.open_menu(self)
+            id: category
+            MDTextFieldHintText:
+                text: 'Category'
+
+                
+    
+    MDDialogButtonContainer:
+        spacing: '100dp'
+
+        MDButton:
+            style: 'text'
+            on_release: root.cancel_dialog()
+            MDButtonText:
+                text: 'Cancel'
+        
+        MDButton:
+            style: 'text'
+            on_release: root.confirm_exp()
+            MDButtonText:
+                text: 'Add'
+
+                        
+
+
+<PiggyScreen>
+    name: 'piggy'
+    Screen:
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+
+        MDTopAppBar: 
+            type: 'small'
+            theme_bg_color: 'Custom'
+            md_bg_color: 'b3cde0'
+
+
+            MDTopAppBarLeadingButtonContainer:
+
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    md_icon_color: "005B96"
+                    on_release: root.switch_to_dashboard()
+            
+            MDTopAppBarTitle:
+                text: "Piggy Bank"
+                theme_text_color: "Custom"
+                text_color: '111416'
+                pos_hint: {"center_x": .5}
+
+        
+
+        MDFloatLayout:
+            #pos_hint: {"center_x": .50, "center_y": .7}
+            MDLabel:
+                id: goal_name
+                text: "iPhone"
+                text_color: "011F4B"
+                halign: 'center'
+                pos_hint: {"center_y": 0.8}
+                font_style: "Headline"
+                role: "large"
+                bold: "True"
+
+        MDFloatLayout:
+        
+            FitImage:
+                source: "images/piggy_pic.png"
+                size_hint_y: 1
+                pos_hint: {"center_y": 1.2, 'center_x': 0.5}
+                radius: "10dp", "10dp", 0, 0
+                size_hint: None, None
+                size: dp(240), dp(240)  # Set the desired size
+
+            MDCard:
+                style: 'filled'
+                pos_hint: {"center_x": .50, "center_y": .04}
+                padding: "4dp"
+                size_hint: None, None
+                size: "300dp", "150dp"
+                theme_bg_color: 'Custom'
+                md_bg_color: 'b3cde0'
+                
+                MDRelativeLayout:
+                    MDLabel:
+                        text: 'Savings'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.88}
+                        font_style: "Title"
+                        role: "medium"
+                    
+                        
+                    MDLabel:
+                        id: goal_amount
+                        text: 'P10 000'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.65}
+                        font_style: "Headline"
+                        role: "large"
+                        bold: "True"
+                    
+
+                    MDLabel:
+                        
+                        text: 'Deadline'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.39}
+                        font_style: "Title"
+                        role: "medium"
+
+
+                    MDLabel:
+                        id: deadline
+                        text: 'Feb 17, 2024'
+                        halign: 'center'
+                        pos_hint: {'center_y': 0.19}
+                        font_style: "Headline"
+                        role: "medium"
+                        bold: "True"
+
+        MDFloatLayout:
+         
+            MDButton:
+                style: 'text'
+                pos_hint: {"center_x": 0.5, "center_y": 0.2}
+                on_release: root.switch_to_history_piggy()
+                MDButtonText:
+                    text: "Transactions"
+                    font_style: "Title"
+                    role: "large"
+                    theme_text_color: 'Custom'
+                    text_color:'grey'
 
 <HistoryScreen_Piggy>
     name: 'history_piggy'
@@ -911,85 +1226,6 @@
 
                 MDButtonText:
                     text: "Change Password"
-
-<DialogScreen>
-    
-    size_hint_x: None
-    width: 400
-    
-    MDDialogHeadlineText:
-        text: 'Add Expenses'
-    
-    MDDialogContentContainer:
-        orientation: 'vertical'
-        spacing: "15dp"
-
-        MDTextField:
-            id: expense_name
-            mode: 'filled'
-            MDTextFieldHintText:
-                text: 'Item'
-
-        MDTextField:
-            id: expense_amount
-            mode: 'filled'
-            MDTextFieldHintText:
-                text: 'Price'
-        
-
-        MDTextField:
-            mode: 'filled'
-            on_focus: root.open_menu(self)
-            id: category
-            MDTextFieldHintText:
-                text: 'Category'
-
-    MDDialogButtonContainer:
-        spacing: '100dp'
-
-        MDButton:
-            style: 'text'
-            on_release: root.cancel_dialog()
-            MDButtonText:
-                text: 'Cancel'
-        
-        MDButton:
-            style: 'text'
-            on_release: root.add_expenses()
-            MDButtonText:
-                text: 'Add'
-
-<DialogScreen_Delete>
-    
-    size_hint_x: None
-    width: 400
-    
-    MDDialogHeadlineText:
-        text: 'Delete Expenses'
-    
-    MDDialogContentContainer:
-        orientation: 'vertical'
-        spacing: "15dp"
-
-        MDTextField:
-            mode: 'filled'
-            MDTextFieldHintText:
-                text: 'Enter Number (No.)'
-    
-    MDDialogButtonContainer:
-        spacing: '100dp'
-
-        MDButton:
-            style: 'text'
-            on_release: root.cancel_dialog()
-            MDButtonText:
-                text: 'Cancel'
-        
-        MDButton:
-            style: 'text'
-            on_release: root.confirm_exp()
-            MDButtonText:
-                text: 'Add'
 
 
 

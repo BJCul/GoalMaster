@@ -34,11 +34,7 @@ class MyApp(MDApp):
 
     def build(self):
         self.theme_cls.theme_style = "Light"
-        self.theme_cls.primary_palette = "Darkcyan"
-        self.theme_cls.accent_palette = "Blue"
-        self.theme_cls.theme_hue = '92C7CF'
-        self.theme_cls.primaryColor = "ffffff"
-        # self.theme_cls.secondaryContainerColor = '92C7CF'
+        self.theme_cls.primary_palette = "Steelblue"
         self.db  = MySQLdb()
 
         self.screen_manager = MDScreenManager()
@@ -54,7 +50,6 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(PiggyScreen(name='piggy'))
         self.screen_manager.add_widget(AccountScreen(name='account'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
-        self.screen_manager.add_widget(HistoryScreen_Tracker(name='history_tracker'))
         self.screen_manager.current = "login"
 
         return self.screen_manager
@@ -546,28 +541,10 @@ class DrawerItem(MDNavigationDrawerItem):
     def on_trailing_text_color(self, instance, value):
         self._trailing_text_obj.text_color = value
 
-class DialogScreen_Delete(MDDialog):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-     
-    def cancel_dialog(self):
-        print('closed')
-        self.dismiss() 
-    
-    def confirm_exp(self):
-        print('ehehehehehe')
-
 class DialogScreen(MDDialog):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.db = MySQLdb()
-
-    def cancel_dialog(self):
-        print('closed')
-        self.dismiss() 
-
-    def confirm_exp(self):
-        print('ehehehehehe')    
 
     def open_menu(self, item):
         menu_items = [
@@ -585,7 +562,7 @@ class DialogScreen(MDDialog):
 
     def menu_callback(self, text_item):
         self.ids.category.text = text_item
-        self.menu.dismiss() 
+        self.menu.dismiss()
 
     def close_dialogbox(self):
         self.dialog = DialogScreen()
@@ -602,13 +579,13 @@ class DialogScreen(MDDialog):
             self.update_trackerscreen_content()                             # clearing the expense_table 
             self.ids.expense_name.text = ''
             self.ids.expense_amount.text = ''
-            # if expenses:
-            #     # Switch to the TrackerScreen to update the display 
-            #     app = MDApp.get_running_app()                
-            #     app.switch_to_screen('tracker')
-            # else:
-            #     print("Expenses not recorded")
-            #     return True, print("Expenses has been recorded")
+            if expenses:
+                # Switch to the TrackerScreen to update the display 
+                app = MDApp.get_running_app()                
+                app.switch_to_screen('tracker')
+            else:
+                print("Expenses not recorded")
+                return True, print("Expenses has been recorded")
             
     def update_trackerscreen_content(self):
         screen_manager = self.manager
@@ -625,14 +602,6 @@ class TrackerScreen(BaseScreen):
         self.update_total_data()            # Update Total Expenses
         self.update_allowance_data()        # Update Allowance 
         #self.update_savings_data()         # Update Savings
-
-    def add_expenses(self):
-        self.dialog = DialogScreen()
-        self.dialog.open()
-    
-    def delete_expenses(self):
-        self.dialog_delete = DialogScreen_Delete()
-        self.dialog_delete.open()
 
     def open_dialogbox(self):
         self.dialog = DialogScreen()
@@ -713,7 +682,7 @@ class CreateexpensesScreen(BaseScreen):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
-    def add_expensess(self):
+    def add_expenses(self):
         user_id = self.db.get_logged_in_userid()
         expense_name = self.ids.expense_name.text
         expense_amount = self.ids.expense_amount.text
@@ -769,7 +738,7 @@ class PiggyScreen(BaseScreen):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
-        #self.update_piggy_data()
+        self.update_piggy_data()
 
     def update_piggy_data(self):
         user_id = self.db.get_logged_in_userid()    
@@ -837,14 +806,6 @@ class HistoryScreen_Piggy(BaseScreen):
     def switch_to_piggy(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('piggy')
-
-class HistoryScreen_Tracker(BaseScreen):
-    def __init__(self, **kwags):
-        super().__init__(**kwags)
-    
-    def switch_to_tracker(self):
-        app = MDApp.get_running_app()
-        app.switch_to_screen('tracker')
     
 
     
