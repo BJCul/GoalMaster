@@ -1,5 +1,6 @@
 import mysql.connector
 import bcrypt
+import datetime
 
 class MySQLdb:
     def __init__(self):
@@ -166,26 +167,97 @@ class MySQLdb:
         """Triggered when the user logsout"""
         self.cursor.execute("UPDATE users SET loggedin = 0, keeploggedin = 0 WHERE loggedin = 1")
         self.db.commit()
+    #####################################FOR SAVINGS#####################################
+    def add_leftover_to_savings(self, user_id, leftover_amount):
+        try:
+            # Insert leftover amount into savings table
+            current_date = datetime.datetime.now().date()
+            sql = "INSERT INTO savings (user_id, amount, date_saved) VALUES (%s, %s, %s)"
+            values = (user_id, leftover_amount, current_date)
+            self.cursor.execute(sql, values)
+            self.db.commit()
+            print("Leftover added to savings successfully!")
+        except Exception as e:
+            print("Error adding leftover to savings:", e)
+            self.db.rollback()
+
+    def update_savings_from_allowance(self, user_id, daily_allowance):
+        # Calculate leftover allowance
+        leftover_amount = self.calculate_leftover_allowance(user_id, daily_allowance)
+        
+        # Add leftover amount to savings if positive
+        if leftover_amount > 0:
+            self.add_leftover_to_savings(user_id, leftover_amount)
+
+    def calculate_leftover_allowance(self, user_id, daily_allowance):
+        try:
+            # Calculate total expenses for the day
+            today = datetime.datetime.now().date()
+            total_expenses = self.get_total_expenses_for_day(user_id, today)
+
+            # Calculate leftover allowance
+            leftover_allowance = daily_allowance - total_expenses
+            return max(leftover_allowance, 0)  # Ensure leftover is non-negative
+        except Exception as e:
+            print("Error calculating leftover allowance:", e)
+            return
+        
+    def get_total_expenses_for_day(self, user_id, date):
+        try:
+            # Convert date to string in YYYY-MM-DD format
+            date_str = date.strftime('%Y-%m-%d')
+
+            # Query to get total expenses for the user on the given date
+            sql = "SELECT SUM(expense_amount) FROM expenses WHERE user_id = %s AND DATE(expense_date) = %s"
+            values = (user_id, date_str)
+            self.cursor.execute(sql, values)
+            
+            # Fetch the result
+            total_expenses = self.cursor.fetchone()[0]  # Total expenses will be the first (and only) column in the result
+            
+            # If there are no expenses for the day, return 0
+            if total_expenses is None:
+                return 0
+            
+            return total_expenses
+        except Exception as e:
+            print("Error fetching total expenses for the day:", e)
+            return 0  # Return 0 in case of an error
 
     #####################################FOR GOAL#####################################
     def create_goal_table(self):
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS goals
                     (ID     INT     PRIMARY KEY AUTO_INCREMENT,
                     goal_name    TEXT                NOT NULL,
-                    goal_amount   INT                 NOT NULL,
-                    allowance      INT                  NOT NULL,
-                    goal_duration  date                )""")
+                    goal_amount   INT                 NOT NULL,                    
+                    goal_duration  date,
+                    allowance      INT                  NOT NULL)""")
     
-    def create_goals(self,user_id,goal_name, goal_amount, goal_duration):
-        sql = "INSERT INTO goals (user_id, goal_name, goal_amount, goal_duration) VALUES (%s, %s, %s,%s)"
-        values = (user_id,goal_name, goal_amount, goal_duration)
+    def create_goals(self,user_id,goal_name, goal_amount, goal_duration, allowance):
+        sql = "INSERT INTO goals (user_id, goal_name, goal_amount, goal_duration, allowance) VALUES (%s, %s, %s, %s,%s)"
+        values = (user_id,goal_name, goal_amount, goal_duration, allowance)
         try:
             self.cursor.execute (sql, values)
             self.db.commit()
-            return True, user_id,goal_name, goal_amount, goal_duration
+            return True, user_id,goal_name, goal_amount, goal_duration, allowance
 
         except Exception as e:
             print("Error creating goal:", e) 
+
+    def get_allowance(self, goal_id):
+        try:           
+            self.cursor.execute("SELECT allowance FROM goals WHERE goal_id=%s", (goal_id,))
+            allowance = self.cursor.fetchall()
+            self.db.commit()
+            if allowance:  # Check if there are goal
+                return allowance  # Return the first goal
+            else:
+                print("No goals found for with user ID:", goal_id)
+                return None
+            
+        except Exception as e:
+            print("Error fetching goals:", e)
+            return None   
 
     def get_goals(self, user_id):
         try:           
