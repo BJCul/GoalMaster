@@ -216,6 +216,8 @@ class MySQLdb:
         except Exception as e:
             print("Error fetching goals:", e)
             return None  
+        
+        
     ##################################################################################
     def add_leftover_to_savings(self, user_id, leftover_amount):
         try:

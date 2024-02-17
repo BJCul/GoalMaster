@@ -128,6 +128,10 @@
             mode: 'outlined' 
             MDTextFieldHintText:
                 text: "Allowance"
+        MDButton:
+            style: "tonal"
+            size_hint: .66, .065
+            md_bg_color: 0.0039, 0.1216, 0.2941, 1
             
         MDButton:
             style: "tonal"
@@ -693,14 +697,15 @@
                 MDFabButton:
                     icon: 'plus'
                     style: 'small'
-                    pos_hint: {'center_x': 0.4, 'center_y': 0.15}
-                    on_release: root.add_expenses()
+                    pos_hint: {'center_x': 0.3, 'center_y': 0.15}
+                    on_release: 
+                        root.manager.current = 'createexpenses'
                 
                 MDFabButton:
                     icon: 'delete'
                     style: 'small'
                     pos_hint: {'center_x': 0.6, 'center_y': 0.15}
-                    on_release: root.delete_expenses()
+                    on_release: root.manager.current = 'createexpenses'
 
 <DialogScreen>
     
@@ -1069,3 +1074,105 @@
                     icon_color: "blue"
                 MDButtonText:
                     text: "Change Password"
+
+<CreateexpensesScreen>
+    name: 'createexpenses'
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar: 
+            type: 'small'
+            theme_bg_color: 'Custom'
+            md_bg_color: 'b3cde0'
+
+            MDTopAppBarLeadingButtonContainer:
+
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    md_icon_color: "005B96"
+                    on_release: root.manager.current = 'tracker'
+
+            MDTopAppBarTitle:
+                text: "Add Expenses"
+                theme_text_color: "Custom"
+                text_color: '111416'
+                pos_hint: {"center_x": .5}
+
+        MDFloatLayout:
+            orientation: "vertical"
+            size_hint_x: .8
+            halign: "center"
+
+
+
+            MDTextField:
+                id: expense_name
+                pos_hint: {"center_x": .6, "center_y": .9}
+
+
+                MDTextFieldHintText:
+                    text: "Name"
+
+                MDTextFieldHelperText:
+                    text: "Enter the name of your expenses"
+
+            MDTextField:
+                id: expense_amount
+                pos_hint: {"center_x": .6, "center_y": .75}
+
+                MDTextFieldHintText:
+                    text: "Price"
+
+                MDTextFieldHelperText:
+                    text: "Enter the amount of your expenses"
+
+            MDButton:
+                style: "elevated"
+                pos_hint: {"center_x": .6, "center_y": .6}
+                on_press: root.add_expenses()
+
+                MDButtonIcon:
+                    icon: "plus"
+                    theme_icon_color: "Custom"
+                    icon_color: "blue"
+
+                MDButtonText:
+                    text: "Add Expenses"
+
+
+
+
+            MDTextField:
+                id: expense_id
+                pos_hint: {"center_x": .6, "center_y": .42}
+
+                MDTextFieldHintText:
+                    text: "ID"
+
+                MDTextFieldHelperText:
+                    text: "Enter the number ID of a specific expense you want to delete"   
+
+            MDButton:
+                style: "elevated"
+                pos_hint: {"center_x": .6, "center_y": .3}
+                id: delete_btn
+                on_press: 
+                    root.delete_expense()
+
+
+                MDButtonIcon:
+                    icon: "delete"
+                    theme_icon_color: "Custom"
+                    icon_color: "blue"
+
+                MDButtonText:
+                    text: "Delete"
+
+            MDDropDownItem:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: root.open_menu(self)
+
+                MDDropDownItemText:
+                    id: drop_text
+                    text: "Item"
