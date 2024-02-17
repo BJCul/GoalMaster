@@ -335,22 +335,25 @@
                 icon: "eye-off"
         
         
+        #MDBoxLayout:
+           # size_hint: .5, None
+         #   pos_hint: {"center_x": .5, "top": .45}
+         #   MDCheckbox:
+         #       id: keepmeloggedin
+            
+        #    MDLabel:
+          #      text: "Keep me logged in"
         MDBoxLayout:
             size_hint: .5, None
-            pos_hint: {"center_x": .5, "top": .45}
-            MDCheckbox:
-                id: keepmeloggedin
+            pos_hint: {"center_x": .5, "top": .5}
+            MDFloatLayout:
+                MDCheckbox:
+                    id: keepmeloggedin
+                    pos_hint: {"center_x": .09, "center_y": .5}
             
-            MDLabel:
-                text: "Keep me logged in"
-        MDBoxLayout:
-            size_hint: .5, None
-            pos_hint: {"center_x": .5, "top": .45}
-            MDCheckbox:
-                id: keepmeloggedin
-            
-            MDLabel:
-                text: "Keep me logged in"
+                MDLabel:
+                    text: "Keep me logged in"
+                    pos_hint: {"center_x": .75, "center_y": .48}
         MDButton:
             style: "tonal"
             size_hint: .66, .065
@@ -834,6 +837,8 @@
 
     MDBoxLayout:
         orientation: 'vertical'
+        theme_bg_color: "Custom"
+        md_bg_color: 'b3cde0'
 
         MDTopAppBar: 
             type: 'small'
