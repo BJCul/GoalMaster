@@ -76,6 +76,10 @@ class MyApp(MDApp):
             return 'down'
         elif current_screen_name == 'piggy' and target_screen_name == 'history_piggy':
             return 'up'
+        elif current_screen_name == 'tracker' and target_screen_name == 'history_tracker':
+            return 'up'
+        elif current_screen_name == 'history_tracker' and target_screen_name == 'tracker':
+            return 'down'
         else:
             # Default transition direction
             return 'left' 
