@@ -1,6 +1,5 @@
 from kivy.lang import Builder
 from datetime import datetime
-# from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
 from kivymd.uix.dialog import MDDialog, MDDialogHeadlineText, MDDialogButtonContainer, MDDialogSupportingText, MDDialogContentContainer
@@ -80,10 +79,13 @@ class MyApp(MDApp):
             return 'down'
         elif current_screen_name == 'piggy' and target_screen_name == 'history_piggy':
             return 'up'
-        # Add more conditions as needed for other screen transitions
+        elif current_screen_name == 'tracker' and target_screen_name == 'history_tracker':
+            return 'up'
+        elif current_screen_name == 'history_tracker' and target_screen_name == 'tracker':
+            return 'down'
         else:
             # Default transition direction
-            return 'left'  # Or any other default direction you prefer
+            return 'left' 
 
     def on_stop(self):
         self.db.close_db_connection()
@@ -149,7 +151,6 @@ class SignupScreen(BaseScreen):
             ),           
         )
         dialog.open()
-    
     
 
     def successful_signup_popup(self):
@@ -245,7 +246,6 @@ class SignupScreen1(BaseScreen):
         else:
             self.invalid_popup()
 
-
     def invalid_popup(self):
         '''Pop up for invalid entries'''
         dialog = MDDialog(
@@ -255,8 +255,7 @@ class SignupScreen1(BaseScreen):
             ),           
         )
         dialog.open()
-    
-    
+       
 
     def successful_signup_popup(self):
         '''Pop up for invalid entries'''
@@ -315,7 +314,6 @@ class AccountScreen(BaseScreen):
         self.update_account_data
 
     def update_account_data(self, name, email):
-        #users = self.db.get_user(user_id)
         name_label = self.ids.name
         email_label = self.ids.email
        
@@ -428,7 +426,6 @@ class LoginScreen(BaseScreen):
             size_hint=(.95, .5)
         )
         dialog.open()
-
         
     def dismiss_dialog(self, dialog):
         dialog.dismiss()
@@ -441,8 +438,6 @@ class DashboardScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
         self.db = MySQLdb()
-
-        #self.update_dashboard_data()
 
     def log_out(self):
         logout = self.db.log_out_user()
@@ -458,8 +453,7 @@ class DashboardScreen(BaseScreen):
         if goals:
             goal_record = goals[0]
             goal_id = goal_record[0]
-            print("Goal:", goal_id)  # Extract the goal_id from the first goal record
-            
+            print("Goal:", goal_id)                                        # Extract the goal_id from the first goal record
             allowance = self.db.get_allowance(goal_id)           
             total_expenses = self.db.total_spending()
             
@@ -556,6 +550,74 @@ class DrawerItem(MDNavigationDrawerItem):
     def on_trailing_text_color(self, instance, value):
         self._trailing_text_obj.text_color = value
 
+class DialogScreen_Delete(MDDialog):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+     
+    def cancel_dialog(self):
+        print('closed')
+        self.dismiss() 
+    
+    def confirm_exp(self):
+        print('ehehehehehe')
+
+class DialogScreen(MDDialog):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.db = MySQLdb()
+
+    def cancel_dialog(self):
+        print('closed')
+        self.dismiss() 
+
+    def confirm_exp(self):
+        print('ehehehehehe')    
+
+    def open_menu(self, item):
+        menu_items = [
+            {
+                "text": "necessity",
+                "on_release": lambda x="necessity": self.menu_callback(x),
+            },
+            {
+                "text": "wants",
+                "on_release": lambda x="wants": self.menu_callback(x), 
+            }
+        ]
+        self.menu = MDDropdownMenu(caller=item, items=menu_items, position= 'bottom')
+        self.menu.open()
+
+    def menu_callback(self, text_item):
+        self.ids.category.text = text_item
+        self.menu.dismiss() 
+
+    def close_dialogbox(self):
+        self.dialog = DialogScreen()
+        self.dialog.dismiss()
+
+    def add_expenses(self):
+        user_id = self.db.get_logged_in_userid()
+        expense_name = self.ids.expense_name.text
+        expense_amount = self.ids.expense_amount.text
+
+        if expense_name != '' and expense_amount != '':
+            self.db.insert_expenses(user_id, expense_name, expense_amount)  # Inserting new expenses
+            expenses = self.db.get_expenses(user_id)                        # getting the expenses based on current user_id
+            self.update_trackerscreen_content()                             # clearing the expense_table 
+            self.ids.expense_name.text = ''
+            self.ids.expense_amount.text = ''
+            # if expenses:
+            #     # Switch to the TrackerScreen to update the display 
+            #     app = MDApp.get_running_app()                
+            #     app.switch_to_screen('tracker')
+            # else:
+            #     print("Expenses not recorded")
+            #     return True, print("Expenses has been recorded")
+            
+    def update_trackerscreen_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('tracker')
+        trackerscreen.update_expenses_data()
 
 class TrackerScreen(BaseScreen):
     def __init__(self, **kwargs):

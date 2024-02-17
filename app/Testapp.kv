@@ -339,22 +339,25 @@
                 icon: "eye-off"
         
         
+        #MDBoxLayout:
+           # size_hint: .5, None
+         #   pos_hint: {"center_x": .5, "top": .45}
+         #   MDCheckbox:
+         #       id: keepmeloggedin
+            
+        #    MDLabel:
+          #      text: "Keep me logged in"
         MDBoxLayout:
             size_hint: .5, None
-            pos_hint: {"center_x": .5, "top": .45}
-            MDCheckbox:
-                id: keepmeloggedin
+            pos_hint: {"center_x": .5, "top": .5}
+            MDFloatLayout:
+                MDCheckbox:
+                    id: keepmeloggedin
+                    pos_hint: {"center_x": .09, "center_y": .5}
             
-            MDLabel:
-                text: "Keep me logged in"
-        MDBoxLayout:
-            size_hint: .5, None
-            pos_hint: {"center_x": .5, "top": .45}
-            MDCheckbox:
-                id: keepmeloggedin
-            
-            MDLabel:
-                text: "Keep me logged in"
+                MDLabel:
+                    text: "Keep me logged in"
+                    pos_hint: {"center_x": .75, "center_y": .48}
         MDButton:
             style: "tonal"
             size_hint: .66, .065
@@ -659,10 +662,7 @@
                             size_hint_y: None
                             height: self.minimum_height
                             orientation: "vertical"
-
-                            
-
-                        
+                       
         MDRelativeLayout:
             
             MDCard:
@@ -705,7 +705,7 @@
                     icon: 'delete'
                     style: 'small'
                     pos_hint: {'center_x': 0.6, 'center_y': 0.15}
-                    on_release: root.manager.current = 'createexpenses'
+                    on_release: root.delete_expenses()
 
 <DialogScreen>
     
@@ -783,7 +783,7 @@
             on_release: root.confirm_exp()
             MDButtonText:
                 text: 'Add'
-
+#to here delete
 
 
 
@@ -842,6 +842,8 @@
 
     MDBoxLayout:
         orientation: 'vertical'
+        theme_bg_color: "Custom"
+        md_bg_color: 'b3cde0'
 
         MDTopAppBar: 
             type: 'small'
@@ -858,8 +860,6 @@
                 theme_text_color: "Custom"
                 text_color: '111416'
                 pos_hint: {"center_x": .5}
-
-
 
         MDFloatLayout:
             #pos_hint: {"center_x": .50, "center_y": .7}
@@ -881,7 +881,7 @@
                 pos_hint: {"center_y": 1.2, 'center_x': 0.5}
                 radius: "10dp", "10dp", 0, 0
                 size_hint: None, None
-                size: dp(240), dp(240)  # Set the desired size
+                size: dp(240), dp(240) 
 
             MDCard:
                 style: 'filled'
