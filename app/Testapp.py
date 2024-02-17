@@ -1,6 +1,5 @@
 from kivy.lang import Builder
 from datetime import datetime
-# from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
 from kivymd.uix.dialog import MDDialog, MDDialogHeadlineText, MDDialogButtonContainer, MDDialogSupportingText
@@ -77,10 +76,9 @@ class MyApp(MDApp):
             return 'down'
         elif current_screen_name == 'piggy' and target_screen_name == 'history_piggy':
             return 'up'
-        # Add more conditions as needed for other screen transitions
         else:
             # Default transition direction
-            return 'left'  # Or any other default direction you prefer
+            return 'left' 
 
     def on_stop(self):
         self.db.close_db_connection()
@@ -146,7 +144,6 @@ class SignupScreen(BaseScreen):
             ),           
         )
         dialog.open()
-    
     
 
     def successful_signup_popup(self):
@@ -242,7 +239,6 @@ class SignupScreen1(BaseScreen):
         else:
             self.invalid_popup()
 
-
     def invalid_popup(self):
         '''Pop up for invalid entries'''
         dialog = MDDialog(
@@ -252,8 +248,7 @@ class SignupScreen1(BaseScreen):
             ),           
         )
         dialog.open()
-    
-    
+       
 
     def successful_signup_popup(self):
         '''Pop up for invalid entries'''
@@ -312,7 +307,6 @@ class AccountScreen(BaseScreen):
         self.update_account_data
 
     def update_account_data(self, name, email):
-        #users = self.db.get_user(user_id)
         name_label = self.ids.name
         email_label = self.ids.email
        
@@ -425,7 +419,6 @@ class LoginScreen(BaseScreen):
             size_hint=(.95, .5)
         )
         dialog.open()
-
         
     def dismiss_dialog(self, dialog):
         dialog.dismiss()
@@ -438,8 +431,6 @@ class DashboardScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
         self.db = MySQLdb()
-
-        #self.update_dashboard_data()
 
     def log_out(self):
         logout = self.db.log_out_user()
@@ -455,7 +446,7 @@ class DashboardScreen(BaseScreen):
         if goals:
             goal_record = goals[0]
             goal_id = goal_record[0]
-            print("Goal:", goal_id)                                        # Extract the goal_id from the first goal record
+            print("Goal:", goal_id)   # Extract the goal_id from the first goal record
             allowance = self.db.get_allowance(goal_id)           
             # Update the allowance
             allowance_value = allowance[0][0]  # Access the first element of the first tuple
@@ -598,13 +589,6 @@ class DialogScreen(MDDialog):
             self.update_trackerscreen_content()                             # clearing the expense_table 
             self.ids.expense_name.text = ''
             self.ids.expense_amount.text = ''
-            # if expenses:
-            #     # Switch to the TrackerScreen to update the display 
-            #     app = MDApp.get_running_app()                
-            #     app.switch_to_screen('tracker')
-            # else:
-            #     print("Expenses not recorded")
-            #     return True, print("Expenses has been recorded")
             
     def update_trackerscreen_content(self):
         screen_manager = self.manager
