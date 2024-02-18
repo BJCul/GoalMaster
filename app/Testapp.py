@@ -23,7 +23,7 @@ from kivymd.uix.label import MDLabel
 
 
 Window.size = (360, 640)
-Window.top = 100
+Window.top = 80
 Window.left = 1000
 
 class MyApp(MDApp):
@@ -50,7 +50,7 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(AccountScreen(name='account'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
         self.screen_manager.add_widget(HistoryScreen_Tracker(name='history_tracker'))
-        self.screen_manager.current = "startup"
+        self.screen_manager.current = "login"
 
         return self.screen_manager
     
@@ -164,15 +164,7 @@ class SignupScreen(BaseScreen):
                     style="text",
                     on_press=lambda *args: self.dismiss_dialog(dialog)
 
-                ),
-                MDButton(
-                    MDButtonText(text="Log In"),
-                    style="text",
-                    on_press=lambda *args: self.goto_login(dialog)
-
-                ),
-                spacing="8dp",
-                
+                )                
             ),
             size_hint = (.9, None)
         )
@@ -308,8 +300,6 @@ class AccountScreen(BaseScreen):
         super().__init__(**kwags) 
         self.db  = MySQLdb()
 
-        self.update_account_data
-
     def update_account_data(self, name, email):
         name_label = self.ids.name
         email_label = self.ids.email
@@ -356,31 +346,25 @@ class LoginScreen(BaseScreen):
             keep_me_logged = False
         # check if users has an account 
         if email != '' and password != '':
-            userid_ = self.db.get_user(email, password, keep_me_logged)            
-    
+            userid = self.db.get_user(email, password, keep_me_logged)  
+            print("Existing_account:????", userid)                          
             # validate the user
-            if userid_ == True:
+            if userid[0] == True: 
                 self.successful_login = True
-                userid = self.db.get_users(email, password, keep_me_logged)
-
-                print("User ID:", userid)
-                userid1 = userid[0]
-                userid2 = userid[1]
-                print("Name:", userid1), print("Email:",userid2)
-                
-                users_info = self.db.get_users_info(userid1)
-
+                users_info = self.db.get_users_info(userid[1])
+                print("users info:", users_info)
                 name = users_info[0][0]
                 email = users_info[0][1]
 
                 print("Name:", name), print("Email:",email)
                 self.update_account_content(name, email)
-
+                self.update_piggy_content()
+                #self.update_trackerscreen_content()                   
                 self.ids.email.text = ''
                 self.ids.password.text=''
                 return True, print("login success")
                         
-            elif userid_ == False:
+            elif userid == False:
                 self.invalid_popup()
     
             else:
@@ -392,6 +376,17 @@ class LoginScreen(BaseScreen):
         screen_manager = self.manager
         trackerscreen = screen_manager.get_screen('account')
         trackerscreen.update_account_data(name, email)
+
+    def update_piggy_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('piggy')
+        trackerscreen.update_piggy_data()
+
+    def update_trackerscreen_content(self):
+        screen_manager = self.manager
+        trackerscreen = screen_manager.get_screen('tracker')
+        trackerscreen.update_trackerscreen_data()    
+        
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
@@ -487,9 +482,6 @@ class CreateGoalScreen(BaseScreen):
         if goal_name != '' and goal_amount != '' and goal_duration != '' and allowance != '':
             self.db.create_goals(user_id, goal_name, goal_amount, goal_duration, allowance)
             goals = self.db.get_goals(user_id)
-            self.update_piggy_content()
-            self.update_trackerscreen_content()
-            self.update_dashboard_content()
             print('goal created successfully')
             if goals:
                 print('created successfully')
@@ -537,92 +529,11 @@ class DrawerItem(MDNavigationDrawerItem):
     def on_trailing_text_color(self, instance, value):
         self._trailing_text_obj.text_color = value
 
-class DialogScreen_Delete(MDDialog):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-     
-    def cancel_dialog(self):
-        print('closed')
-        self.dismiss() 
-    
-    def confirm_exp(self):
-        print('ehehehehehe')
-
-class DialogScreen(MDDialog):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.db = MySQLdb()
-
-    def cancel_dialog(self):
-        print('closed')
-        self.dismiss() 
-
-    def confirm_exp(self):
-        print('ehehehehehe')    
-
-    def open_menu(self, item):
-        menu_items = [
-            {
-                "text": "necessity",
-                "on_release": lambda x="necessity": self.menu_callback(x),
-            },
-            {
-                "text": "wants",
-                "on_release": lambda x="wants": self.menu_callback(x), 
-            }
-        ]
-        self.menu = MDDropdownMenu(caller=item, items=menu_items, position= 'bottom')
-        self.menu.open()
-
-    def menu_callback(self, text_item):
-        self.ids.category.text = text_item
-        self.menu.dismiss() 
-
-    def close_dialogbox(self):
-        self.dialog = DialogScreen()
-        self.dialog.dismiss()
-
-    def add_expenses(self):
-        user_id = self.db.get_logged_in_userid()
-        expense_name = self.ids.expense_name.text
-        expense_amount = self.ids.expense_amount.text
-
-        if expense_name != '' and expense_amount != '':
-            self.db.insert_expenses(user_id, expense_name, expense_amount)  # Inserting new expenses
-            expenses = self.db.get_expenses(user_id)                        # getting the expenses based on current user_id
-            self.update_trackerscreen_content()                             # clearing the expense_table 
-            self.ids.expense_name.text = ''
-            self.ids.expense_amount.text = ''
-            
-    def update_trackerscreen_content(self):
-        screen_manager = self.manager
-        trackerscreen = screen_manager.get_screen('tracker')
-        trackerscreen.update_expenses_data()
-
 class TrackerScreen(BaseScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.db = MySQLdb()
-
-
-        self.update_expenses_data()         # Update content initially
-        self.update_total_data()            # Update Total Expenses
-        self.update_allowance_data()        # Update Allowance 
-        #self.update_savings_data()         # Update Savings
-
-
-    def add_expenses(self):
-        self.dialog = DialogScreen()
-        self.dialog.open()
-    
-    def delete_expenses(self):
-        self.dialog_delete = DialogScreen_Delete()
-        self.dialog_delete.open()
-
-    def open_dialogbox(self):
-        self.dialog = DialogScreen()
-        self.dialog.open()
-   
+       
     def update_savings_data(self):
         savings = self.ids.savings
         savings.text = f"Savings: ₱ {savings}"
@@ -649,13 +560,16 @@ class TrackerScreen(BaseScreen):
 
     def update_total_data(self):
         expense_total_label = self.ids.expense_total
-        total_spending_tuple = self.db.total_spending()
+        user_id = self.db.get_logged_in_userid()
+        goal_id = self.db.get_goal_id(user_id)
+        print("GOAL ID:", goal_id)
 
-        total_spending = total_spending_tuple[0]
+        total_expenses = self.db.total_spending(goal_id)
+        print("TOTAL:", total_expenses)
 
-        expense_total_label.text = f"Total Expenses: ₱ {total_spending}"
+        expense_total_label.text = f"Total Expenses: ₱ {total_expenses}"
 
-    def update_expenses_data(self):
+    def update_trackerscreen_data(self):
         self.update_total_data()
         user_id = self.db.get_logged_in_userid()
         items = self.db.get_expenses(user_id)
@@ -666,20 +580,22 @@ class TrackerScreen(BaseScreen):
         if items is None:
             print("No items retrieved from the database.")
             return
-
-        for expense_id, user_id, expense_name, expense_amount in items:
-            expense_table.data.append(
-                {
-                    "viewclass": "MDLabel",
-                    "text": f"{expense_id}                      {expense_name}             ₱ {expense_amount}",
-                    "adaptive_height": True,
-                    "theme_text_color": "Primary",
-                    "font_style": "Body",
-                    "role": "large"
-                }
-            )
-        
-        print("Data has been updated.")
+        else:
+            print("Items:", items)
+            for expense_id, user_id, expense_name, expense_amount in items:
+                expense_table.data.append(
+                    {
+                        "viewclass": "MDLabel",
+                        "text": f"{expense_id}                      {expense_name}             ₱ {expense_amount}",
+                        "adaptive_height": True,
+                        "theme_text_color": "Primary",
+                        "font_style": "Body",
+                        "role": "large"
+                    }
+                )
+            
+            print("Data has been updated.")
+       
 
     def switch_to_dashboard(self):
         app = MDApp.get_running_app()
@@ -689,24 +605,23 @@ class TrackerScreen(BaseScreen):
         app = MDApp.get_running_app()
         app.switch_to_screen('history_tracker')
 
-    def add_expenses(self):
-        self.dialog = DialogScreen()
-        self.dialog.open()
 
 class CreateexpensesScreen(BaseScreen):
     def __init__(self, **kwags):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
-    def add_expensess(self):
+    def add_expenses(self):
         user_id = self.db.get_logged_in_userid()
+        goal_id = self.db.get_goal_id(user_id)
         expense_name = self.ids.expense_name.text
         expense_amount = self.ids.expense_amount.text
 
         if expense_name != '' and expense_amount != '':
-            self.db.insert_expenses(user_id, expense_name, expense_amount) # Inserting new expenses
-            expenses = self.db.get_expenses(user_id)              # getting the expenses based on current user_id
-            self.update_trackerscreen_content()                   # clearing the expense_table 
+            self.db.insert_expenses(goal_id, expense_name, expense_amount) # Inserting new expenses
+            expenses = self.db.get_expenses(goal_id)              # getting the expenses based on current user_id
+            print("Expenses:", expenses)
+            #self.update_trackerscreen_content()                   # clearing the expense_table 
             self.ids.expense_name.text = ''
             self.ids.expense_amount.text = ''
             if expenses:
@@ -715,7 +630,8 @@ class CreateexpensesScreen(BaseScreen):
                 app.switch_to_screen('tracker')
             else:
                 print("Expenses not recorded")
-                return True, print("Expenses has been recorded")
+        
+        return True, print("Expenses has been recorded")
             
 
     def delete_expense(self):
@@ -749,59 +665,54 @@ class PiggyScreen(BaseScreen):
         super().__init__(**kwags)
         self.db = MySQLdb()
 
-        #self.update_piggy_data()
-
     def update_piggy_data(self):
         user_id = self.db.get_logged_in_userid()    
         goals = self.db.get_goals(user_id)   
-        
-        # Update the goal name
         print("Goal data:", goals)
         if goals:
-            goal_record = goals[0]
-            print("Goal record:", goal_record) 
+            goal_id = goals[0]
+            user_id = goals[1]
+            goal_name = goals[2]
+            goal_duration = goals[4]
+            goal_amount = goals[3]
+            allowance = goals[5]
 
-        # Goals containing record inside so typical indexing hindi gagana
-        goal_id = goal_record[0]
-        user_id = goal_record[1]
-        _goal_name = goal_record[2]
-        _goal_duration = goal_record[3]
-        _goal_amount = goal_record[4]
-        _allowance = goal_record[5]
+            print("Goal:", goal_id, user_id, goal_name, goal_duration, goal_amount, allowance)
 
-        print("Goal:", goal_id, user_id, _goal_name, _goal_duration, _goal_amount, _allowance)
-
-        if goal_record:
-            goal_name = _goal_name # return the goal name
-            updated_goal_name = goal_name.upper()  # Convert to uppercase
+            if goal_name:
+                print ("goal name:", goal_name)                  # return the goal name
+                updated_goal_name = goal_name.upper()   # Convert to uppercase
+                
+                # Update the goal name label
+                goal_name_label = self.ids.goal_name
+                goal_name_label.text = updated_goal_name
             
-            # Update the goal name label
-            goal_name_label = self.ids.goal_name
-            goal_name_label.text = updated_goal_name
-        
-        try:
-            if goals:
-                goal_amount = _goal_amount
-                formatted_goal_amount = "{:,.0f}".format(_goal_amount)
-                goal_amount_label = self.ids.goal_amount
-                goal_amount_label.text = formatted_goal_amount
+            try:
+                if goals:
+                    print ("goal amount:", goal_amount)
+                    formatted_goal_amount = "{:,.0f}".format(goal_amount)
+                    goal_amount_label = self.ids.goal_amount
+                    goal_amount_label.text = f"₱ {formatted_goal_amount}"
 
-        except ValueError:
-            print("Invalid goal amount:", goal_amount)
-            # Handle the case where the input is not a valid number
+            except ValueError:
+                print("Invalid goal amount:", goal_amount)
+                # Handle the case where the input is not a valid number
 
-        # Update the goal duration
-        try:
-            if goals:
-                goal_duration = _goal_duration
-                formatted_deadline = _goal_duration.strftime("%B %d, %Y")
-                goal_duration_label = self.ids.deadline
-                goal_duration_label.text = formatted_deadline  # Update the goal duration label
-                # goal_duration_label.text = f"{goal_duration}"
-        except IndexError:
-            print("Invalid goal duration or no goals found.")
-            # Handle the case where the goal duration index is out of range or no goals are found
-    
+            # Update the goal duration
+            try:
+                if goals:
+                    formatted_deadline = goal_duration.strftime("%B %d, %Y")
+                    goal_duration_label = self.ids.deadline
+                    goal_duration_label.text = formatted_deadline  # Update the goal duration label
+                    # goal_duration_label.text = f"{goal_duration}"
+            except IndexError:
+                print("Invalid goal duration or no goals found.")
+                # Handle the case where the goal duration index is out of range or no goals are found
+        else: 
+             print("No goals found")
+
+
+
     def switch_to_dashboard(self):
         app = MDApp.get_running_app()
         app.switch_to_screen('dashboard')
