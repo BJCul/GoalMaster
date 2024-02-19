@@ -230,7 +230,7 @@ class MySQLdb:
                 return allowance  # Return the first goal
             else:
                 print("No goals found for with user ID:", goal_id)
-                return None
+                return 0
 
         except Exception as e:
             print("Error fetching goals:", e)

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from kivy.lang import Builder
 from datetime import datetime
 from kivymd.uix.screen import MDScreen
@@ -50,7 +51,7 @@ class MyApp(MDApp):
         self.screen_manager.add_widget(AccountScreen(name='account'))
         self.screen_manager.add_widget(HistoryScreen_Piggy(name='history_piggy'))
         self.screen_manager.add_widget(HistoryScreen_Tracker(name='history_tracker'))
-        self.screen_manager.current = "login"
+        self.screen_manager.current = "startup"
 
         return self.screen_manager
     
@@ -308,6 +309,7 @@ class LoginScreen(BaseScreen):
         self.user_id = None
         
     def user_login(self):
+        self.successful_login = False
         email = self.ids.email.text
         password = self.ids.password.text
         # check if user has press the keep me logged in check box
@@ -330,7 +332,7 @@ class LoginScreen(BaseScreen):
                 print("Name:", name), print("Email:",email)
                 self.update_account_content(name, email)
                 self.update_piggy_content()
-                #self.update_trackerscreen_content()                   
+                self.update_trackerscreen_content()               
                 self.ids.email.text = ''
                 self.ids.password.text=''
                 return True, print("login success")
@@ -362,7 +364,6 @@ class LoginScreen(BaseScreen):
         screen_manager = self.manager
         trackerscreen = screen_manager.get_screen('dashboard')
         trackerscreen.update_dashboard_data()
-
 
     def invalid_popup(self):
         '''Pop up for invalid entries'''
@@ -419,7 +420,9 @@ class CreateGoalScreen(BaseScreen):
             print('goal created successfully')
             if goals:
                 print('created successfully')
+
                 self.update_piggy_content()
+                self.update_dashboard_content()
             else: 
                 print('goal not created')
         else: 
@@ -430,12 +433,12 @@ class CreateGoalScreen(BaseScreen):
         trackerscreen = screen_manager.get_screen('piggy')
         trackerscreen.update_piggy_data()
 
-    """
+    
     def update_dashboard_content(self):
         screen_manager = self.manager
         trackerscreen = screen_manager.get_screen('dashboard')
-        trackerscreen.update_dashboard_data()
-
+        trackerscreen.update_dashboard_signup_data()
+    """
     def update_trackerscreen_content(self):
         screen_manager = self.manager
         tracker = screen_manager.get_screen('tracker')
@@ -492,6 +495,20 @@ class DashboardScreen(BaseScreen):
     def update_dashboard_data(self, remaining_allowance):
             allowance_label = self.ids.allowance  
             allowance_label.text = f"₱ {remaining_allowance}" 
+    
+    def update_dashboard_signup_data(self):
+        user_id = self.db.get_logged_in_userid() 
+        goals = self.db.get_goals(user_id)
+        if goals:   
+            print("goals", goals)
+            print ("goal_id", goals[0])
+            goal_id = goals[0]
+            allowance = self.db.get_allowance(goal_id)           
+            allowance_value = allowance[0][0]  # Access the first element of the first tuple
+            allowance_label = self.ids.allowance  # Access the label widget
+            allowance_label.text = f"₱ {allowance_value}"  # Update the text of the label
+        else: 
+            print("No goals found for the user.")
 
     def toggle_nav_drawer(self):
         self.ids.top_app_bar.ids.nav_drawer.toggle_nav_drawer()
@@ -538,24 +555,40 @@ class TrackerScreen(BaseScreen):
 
         result = self.db.total_spending(goal_id)
         total_expenses = result[0][0]
-        expense_total_label.text = f"Total Expenses: ₱ {total_expenses}"
+        expense_total_label.text = f"Total Expenses: ₱ {total_expenses}"        
         self.update_allowance_data(total_expenses)
+    
+    def clear_allowance_data(self):
+        allowance_label = self.ids.allowance 
+        allowance_label.text =f"₱"
+
 
     def update_allowance_data(self, goal_id):
         allowance = self.db.get_allowance(goal_id)
         total_expenses = self.db.total_spending(goal_id)
-        if allowance and total_expenses:
+        print("Allowance:", allowance)
+        print("Total:", total_expenses)
+        value = total_expenses[0][0]
+        if value == None:
+            value = value or Decimal('0')
+
+        if allowance is not None and value is not None:
             allowance_value = allowance[0][0] if allowance else 0
-            total_expenses_value = total_expenses[0][0] if total_expenses else 0
+            total_expenses_value = value if value else 0
             remaining_allowance = allowance_value - total_expenses_value
 
             allowance_label = self.ids.allowance  # Access the label widget
             allowance_label.text = f"Allowance: ₱ {remaining_allowance}"
             self.update_dashboard_content(remaining_allowance)
         else:
-            print("Error fetching allowance or total expenses.")
+            allowance_label = self.ids.allowance  # Access the label widget
+            allowance_label.text = f"Allowance: ₱ 0"
+            self.update_dashboard_content(remaining_allowance)
 
     def update_trackerscreen_data(self):
+        expense_table = self.ids.expense_table
+        expense_table.data = []
+
         user_id = self.db.get_logged_in_userid()
         goal_id = self.db.get_goal_id_(user_id)
         print("GOAL ID:", goal_id)

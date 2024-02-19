@@ -280,7 +280,7 @@
             halign: 'center'
             on_press: 
                 root.create_user()
-                root.manager.current = 'creategoal' if root.successful_signup else 'signup'
+                root.manager.current = 'login' if root.successful_signup else 'signup'
             MDButtonText:
                 text: "Sign Up"
                 theme_text_color: "Custom"
@@ -363,7 +363,7 @@
             halign: 'center'
             on_press: 
                 root.user_login()
-                root.manager.current = 'dashboard' if root.successful_login else 'login'
+                root.manager.current = 'creategoal' if root.successful_login else 'login'
             MDButtonText:
                 text: "Login"
                 theme_text_color: "Custom"
