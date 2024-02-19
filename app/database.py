@@ -15,19 +15,6 @@ class MySQLdb:
         self.create_expenses()
         self.create_savings()
 
-
-    def show_db(self):
-        """show database"""
-        self.cursor.execute("show databases")
-        for x in self.cursor:
-            print(x)
-    
-    def show_table(self):
-        """show table"""
-        self.cursor.execute("show tables")
-        for x in self.cursor:
-            print(x)
-
     def create_user_table(self):
         """Create the user table"""
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS users
@@ -48,13 +35,13 @@ class MySQLdb:
         print(self.cursor.rowcount, "record inserted.")
 
     def check_email(self, email):
-            """Check to see if the email already exists in the database before going onto creating a user"""
-            self.cursor.execute("SELECT id, email FROM users WHERE email = %s", (email,))
-            the_user = self.cursor.fetchall()
-            if not the_user:
-                return False
-            else:
-                return True
+        """Check to see if the email already exists in the database before going onto creating a user"""
+        self.cursor.execute("SELECT id, email FROM users WHERE email = %s", (email,))
+        the_user = self.cursor.fetchall()
+        if not the_user:
+            return False
+        else:
+            return True
             
     def get_user(self, email, password, keepmelogged):
         """Get the user when logging in to the system"""
@@ -70,8 +57,7 @@ class MySQLdb:
             self.db.commit()
             return True, user_id[0][0]
         else:
-            return False
-
+            return False, None
 
 
     def get_users(self, email, password, keepmelogged):
@@ -92,7 +78,7 @@ class MySQLdb:
         
     def get_users_info(self, user_id):
         try:           
-            self.cursor.execute("SELECT name, email, goal_id FROM users WHERE id=%s", (user_id,))
+            self.cursor.execute("SELECT name, email FROM users WHERE id=%s", (user_id,))
             users_info = self.cursor.fetchall()
             if users_info:  # Check if there are users
                 return users_info  # Return the users_info
@@ -205,7 +191,21 @@ class MySQLdb:
         except Exception as e:
             print("Error fetching goals:", e)
             return None
-
+    
+    def get_goal_id_(self, user_id):
+        try:           
+            """Get the goal_id of the currently logged in user"""
+            self.cursor.execute("SELECT goal_id FROM goals WHERE user_id=%s ORDER BY goal_id DESC LIMIT 1", (user_id,))
+            goalid = self.cursor.fetchall()
+            if goalid:
+                return goalid[0][0]
+            else:
+                return None            
+            
+        except Exception as e:
+            print("Error fetching goals:", e)
+            return None
+        
     def get_goals(self, user_id):
         try:           
             self.cursor.execute("SELECT * FROM goals WHERE user_id=%s ORDER BY goal_id DESC LIMIT 1", (user_id,))
@@ -321,18 +321,19 @@ class MySQLdb:
         try:
             sql = "INSERT INTO expenses (goal_id, expense_name, expense_amount) VALUES (%s, %s, %s)"
             values = (goal_id, expense_name, expense_amount)
-            expenses = self.cursor.execute (sql, values)
+            self.cursor.execute (sql, values)
             self.db.commit()
-            return True, expenses
+            self.cursor.fetchall()  
+            return True
         
         except Exception as e:
             # Handle any exceptions that occur during the insertion process
             self.db.rollback()  # Rollback the transaction in case of an error
             print("Error inserting expense:", e)
          
-    def delete_expenses(self, expense_id):
-        sql = "DELETE FROM expenses WHERE expense_id=%s"
-        value = (expense_id,)
+    def delete_expenses(self, expenses_id):
+        sql = "DELETE FROM expenses WHERE expenses_id=%s"
+        value = (expenses_id,)
         self.cursor.execute (sql, value)
         self.db.commit()
         return True 
@@ -356,7 +357,7 @@ class MySQLdb:
     
     def total_spending(self, goal_id):
         try:
-            self.cursor.execute("SELECT expense_amount FROM expenses WHERE goal_id = %s", (goal_id,))
+            self.cursor.execute("SELECT SUM(expense_amount) FROM expenses WHERE goal_id = %s", (goal_id,))
             total_expenses = self.cursor.fetchall()
             return total_expenses if total_expenses is not None else 0  
         except Exception as e:
