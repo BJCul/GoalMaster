@@ -510,7 +510,35 @@
                             pos: "15dp", "30dp"
                             font_style: "Title"
                             role: "large"
-            
+
+            MDCard:
+                style: "outlined"
+                pos_hint: {"center_x": .50, "center_y": .22}
+                padding: "4dp"
+                size_hint: None, None
+                size: "300dp", "150dp"
+                theme_bg_color: 'Custom'
+                md_bg_color: 'b3cde0'
+
+
+                MDRelativeLayout:
+
+                    MDLabel:
+                        text: "Time :"
+                        adaptive_size: True
+                        color: "grey"
+                        pos: "15dp", "55dp"
+                        font_style: "Title"
+                        role: "small"
+
+                        MDLabel:
+                            text: "0"
+                            adaptive_size: True
+                            color: "blue"
+                            bold: True
+                            pos: "15dp", "30dp"
+                            font_style: "Title"
+                            role: "large"            
 
     MDNavigationDrawer:
         id: nav_drawer
